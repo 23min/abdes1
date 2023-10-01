@@ -1,0 +1,67 @@
+{
+	"name": "Python 3",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "..",
+		"args": { 
+			// Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
+			// Append -bullseye or -buster to pin to an OS version.
+			// Use -bullseye variants on local on arm64/Apple Silicon.
+			"VARIANT": "3.10-bullseye"
+			// Options
+			// "NODE_VERSION": "lts/*"
+		}
+	},
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": { 
+				"python.defaultInterpreterPath": "/usr/local/bin/python"
+			},
+			
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.black-formatter",
+				"ms-python.debugpy",
+				"ms-python.flake8",
+				"ms-python.isort",
+				"ms-python.mypy-type-checker",
+				"ms-python.pylint",
+				"ms-python.python",
+				"njpwerner.autodocstring",
+				"mgesbert.python-path",
+				"samuelcolvin.jinjahtml",
+				"njqdev.vscode-python-typehint",
+				"EricSia.pythonsnippets3",
+				"eamodio.gitlens",
+				"ms-toolsai.jupyter",
+				"ms-toolsai.jupyter-keymap",
+				"ms-toolsai.jupyter-renderers",
+				"tamasfe.even-better-toml"
+				// "github.copilot",
+				// "github.copilot-chat"
+				// "streetsidesoftware.code-spell-checker"
+			]
+		}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+
+	// On Mac, enable access to GitHub from within container
+	// "mounts": ["source=/run/host-services/ssh-auth.sock,target=/ssh-agent,type=bind"],
+
+	"containerEnv": {
+		"PYTHONPATH": "${containerWorkspaceFolder"
+	},
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "python -m pip install -no-cache-dir -e .[dev]",
+
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode"
+}
