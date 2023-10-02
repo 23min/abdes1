@@ -15,14 +15,20 @@ class Actor:
         self.event_loop = event_loop
         print(f"Actor {self} created")
 
-    async def send_message(self, recipient: 'Actor', message: Message):
-        print(f"Actor {self} sending message {message} to {recipient}")
-        await recipient.mailbox.put(message)
+    async def send_message(self, message: Message) -> None:
+        print(f"Actor {self} sending message {message} to {self.id}")
+        await self.mailbox.put(message)
 
     async def process_message(self, message: Message) -> None:
         # TODO Implement message processing logic
         print(f"Actor {self} received message {message}")
         pass
+
+    async def start_actor(self) -> None:
+        _ = asyncio.create_task(self.run())
+        # The actor is now running in the background
+        # You can do other things here, or just return
+        return
 
     async def run(self) -> None:
         print(f"Actor {self} running")
