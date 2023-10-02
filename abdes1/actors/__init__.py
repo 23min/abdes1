@@ -1,4 +1,5 @@
-from .actor import Actor, Message
+from .actor import Actor
+from .message import Message
 from .resource import Resource
 from .process import Process
 

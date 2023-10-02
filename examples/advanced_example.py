@@ -1,13 +1,16 @@
 import asyncio
 
-from abdes1. import Message
-from abdes1.src.abdes1.core import EventLoop, Event, Message
+from abdes1.core import EventLoop, Event
+from abdes1.actors import Message
+from abdes1.actors import Process
+from abdes1.actors import Resource
 
 
 async def main():
+    print("creating event loop")
     event_loop = EventLoop()
-    resource = Resource(event_loop, capacity=2)
-    process = Process(event_loop)
+    resource = Resource("resource1", event_loop, capacity=2)
+    process = Process("process1", event_loop)
 
     event_loop.actors.extend([resource, process])
 
@@ -19,5 +22,5 @@ async def main():
     # Start the event loop
     await event_loop.run()
 
-    if __name__ == '__main__':
-        asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
