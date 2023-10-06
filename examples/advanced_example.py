@@ -22,11 +22,11 @@ def find_actor(target_actor: str) -> Optional[Actor]:
     return None
 
 
-async def start_input_loop() -> None:
-    _ = asyncio.create_task(user_input_loop())
-    # The event loop is now running in the background
-    # You can do other things here, or just return
-    return
+# async def start_input_loop() -> None:
+#     _ = asyncio.create_task(user_input_loop())
+#     # The event loop is now running in the background
+#     # You can do other things here, or just return
+#     return
 
 
 async def user_input_loop() -> None:
@@ -34,6 +34,11 @@ async def user_input_loop() -> None:
         user_message: str = input("Enter your message (or 'q' to quit): ")
         if user_message.lower() == 'q':
             break
+
+        send_after: str = input("Enter the scheduled time after which to process (seconds), enter for random:")
+        if (send_after != "") and (float(send_after) < 0):
+            print("Invalid time, must be positive decimal number. Try again.")
+            continue
 
         while True:  # Loop until a valid actor is entered or user decides to break out
             target_actor = input("Enter the target actor (l to list, 'r' to reset): ")
@@ -67,10 +72,13 @@ async def user_input_loop() -> None:
         print(f"Found Actor {target_actor}")
         actor = cast(Actor, actor_maybe)
 
-        time = random.random() * 10
+        timestr = send_after if send_after != "" and float(send_after) else random.random() * 10
+        time = cast(float, timestr)
+
+        # time =  random.random() * cast(float, send_after)
         message = Message(type='user-message', content=user_message, time=time)
 
-        await actor.send_message(message)
+        # await actor.send_message("user", message)
 
         event = Event(time=time, target_actor=actor, message=message)
         event_loop.schedule_event(event)
@@ -88,16 +96,27 @@ async def main():
     start_event = Event(time=0.0, target_actor=process, message=start_message)
     event_loop.schedule_event(start_event)
 
-    # Start actors
-    for actor in event_loop.actors:
-        await actor.start_actor()
+    # # Start actors
+    # for actor in event_loop.actors:
+    #     await actor.run()
 
-    # Start the event loop
-    await event_loop.start_event_loop()
+    # # Start the event loop
+    # await event_loop.run()
 
-    # Let the user send messages to actors
-    await start_input_loop()
+    # # Let the user send messages to actors
+    # await start_input_loop()
 
+    # Schedule all actors to run concurrently
+    actor_tasks = [asyncio.create_task(actor.run()) for actor in event_loop.actors]
+
+    # Schedule the event loop and input loop
+    event_loop_task = asyncio.create_task(event_loop.run())
+    input_loop_task = asyncio.create_task(user_input_loop())
+
+    # Optionally, if you ever want to wait for their completion (probably not in your case, since they're endless loops)
+    await asyncio.gather(*actor_tasks, event_loop_task, input_loop_task)
+
+    pass
 
 if __name__ == '__main__':
     asyncio.run(main())
