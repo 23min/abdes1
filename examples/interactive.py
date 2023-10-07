@@ -1,3 +1,9 @@
+"""
+interactive.py
+
+Provides an interactivve playground for experimenting with abdes1
+
+"""
 import asyncio
 
 # scripts findability
