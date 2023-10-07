@@ -6,6 +6,8 @@ from abdes1.actors import Actor, Message
 from abdes1.core import EventLoop
 # if TYPE_CHECKING:
 
+# TODO SimPy concept. Implement Ask pattern to use this type of actor
+
 
 class Resource(Actor):
     def __init__(self, id: str, event_loop: EventLoop, capacity: int) -> None:

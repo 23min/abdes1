@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import setup  # type: ignore
+# , find_packages
 
 setup(
     name='abdes1',
@@ -10,8 +11,8 @@ setup(
     author_email='peter@23min.com',
     url='https://github.com/23min/abdes1',
     license='MIT',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    # packages=find_packages('src'),
+    # package_dir={'': 'src'},
     install_requires=[
         # List your project's dependencies here
         # e.g., 'numpy>=1.18.5',

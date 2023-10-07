@@ -17,31 +17,27 @@ class Actor:
 
     async def send_message(self, fromId: str, message: Message) -> None:
         # TODO Handle when mailbox is full / backpressure
-        print(f"Actor {self} sending message {message} to {self.id}")
+        print(f"Actor {self.id} queueing message {message} in mailbox")
         await self.mailbox.put(message)
 
     async def process_message(self, message: Message) -> None:
+        print(f"Actor {self} processing message {message}")
         # TODO Implement message processing logic
         # TODO Validate message is for this actor
         # TODO Validate message format
-        print(f"Actor {self} received message {message}")
+        print(f"Actor {self} processed message {message}")
         pass
-
-    # async def start_actor(self) -> None:
-    #     _ = asyncio.create_task(self.run())
-    #     # The actor is now running in the background
-    #     # You can do other things here, or just return
-    #     return
 
     async def run(self) -> None:
         print(f"Actor {self} running")
         while True:
             message = await self.mailbox.get()
-            print(f"Actor {self} received message {message}")
+            print(f"Actor {self} handling mailbox message {message}")
             if message.time > self.event_loop.simulation_time:
                 # Message is in the future!
                 # Reschedule the message if it's too early to process it
                 await asyncio.sleep(message.time - self.event_loop.simulation_time)
-            print(f"Actor {self} processing message {message}")
             await self.process_message(message)
 
+        # TODO support shutdown
+        # print("Actor stopping")
