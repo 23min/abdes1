@@ -7,8 +7,8 @@ from abdes1.core import EventLoop
 
 def test_actors() -> None:
     eventloop = EventLoop()
-    actor1 = Actor(eventloop)
-    actor2 = Actor(eventloop)
+    actor1 = Actor("actor1", eventloop)
+    actor2 = Actor("actor2", eventloop)
 
     assert actor1 in eventloop.actors
     assert actor2 in eventloop.actors

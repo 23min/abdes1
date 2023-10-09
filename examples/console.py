@@ -36,7 +36,7 @@ def get_target_actor() -> str:
     return session.prompt(HTML('<aaa fg="black" bg="gold">Enter the target actor (\'l\' to list, \'r\' to start over, \'q\' to quit):</aaa> '))
 
 
-def is_float(s):
+def is_float(s: str):
     try:
         float(s)
         return True
@@ -60,6 +60,8 @@ async def user_input_loop(event_loop: EventLoop) -> None:
             print_formatted_text(HTML("<red>Invalid time, must be positive decimal number.</red>"))
             continue
         print_formatted_text(HTML(f"<gold>You entered: {delay_s}</gold>"))
+
+        actor_maybe = None
 
         while True:  # Loop until a valid actor is entered or user decides to break out
 
