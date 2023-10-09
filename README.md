@@ -27,19 +27,19 @@ Simulations are performed by running an actor system which computes state over t
 
 ## TODO
 
-[] Improve the console
+[x] Improve the console
 
 Currently, the console mixes debug output and input lines. Separate the input from the output.
 
-[] Console as an actor
+[ ] Console as an actor
 
 Investigate whether everything can/should be an actor. The advantage if the console is an actor is that it will be easier to interact with the actor system correctly.
 
-[] Supervisors. 
+[ ] Supervisors. 
 
 With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here Erlang can be of inspiration. 
 
-[] Implement what is needed in a DES & try to run a minimal simulation
+[ ] Implement what is needed in a DES & try to run a minimal simulation
 
 - Event calendar / Fuuture Event List / Loop
 - State management / Ability to interrogate state / logging 
@@ -54,10 +54,11 @@ With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here 
 - Random number genertion / how is randomness achieved or determinism guaranteed?
 - GUI / Design, administration and monitoring
 
-[] Implement a Single Server Queueing system (M/M/1 queue)
+[ ] Implement a Single Server Queueing system (M/M/1 queue)
 ...
 
-[] Performance
+[ ] Performance
+
 ## Q&A
 
 Q: Why not use an existing actor framework, such as Elixir with BEAM, Akka (Pykka) etc? And why not use an existing simulation library like SimPy?

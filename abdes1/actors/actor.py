@@ -3,16 +3,17 @@ import asyncio
 from asyncio import Queue
 from typing import TYPE_CHECKING
 
-from abdes1.core import EventLoop
 if TYPE_CHECKING:
     from .message import Message
+from abdes1.core import ActorSystem
 
 
-class Actor:
-    def __init__(self, id: str, event_loop: EventLoop) -> None:
+class Actor():
+    def __init__(self, id: str, actor_system: ActorSystem) -> None:
         self.id = id
         self.mailbox: Queue[Message] = Queue()
-        self.event_loop = event_loop
+        self.actor_system = actor_system
+        # self.event_loop = event_loop
         print(f"Actor {self} created")
 
     async def send_message(self, fromId: str, message: Message) -> None:
@@ -33,10 +34,11 @@ class Actor:
         while True:
             message = await self.mailbox.get()
             print(f"Actor {self.id} handling mailbox message: {message}")
-            if message.time > self.event_loop.simulation_time:
+            if message.time > self.actor_system.event_loop.simulation_time:
                 # Message is in the future!
                 # Reschedule the message if it's too early to process it
-                await asyncio.sleep(message.time - self.event_loop.simulation_time)
+                # TODO Can't sleep this long. The simulation time may have advanced!
+                await asyncio.sleep(message.time - self.actor_system.event_loop.simulation_time)
             await self.process_message(message)
 
         # TODO support shutdown

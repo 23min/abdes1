@@ -1,21 +1,27 @@
 
 from asyncio import Queue
-# from typing import TYPE_CHECKING
+from typing import TypedDict
 
 from abdes1.actors import Actor, Message
-from abdes1.core import EventLoop
-# if TYPE_CHECKING:
+from abdes1.core import ActorSystem
+from abdes1.core import ActorProtocol
 
 # TODO SimPy concept. Implement Ask pattern to use this type of actor
 
 
-class Resource(Actor):
-    def __init__(self, id: str, event_loop: EventLoop, capacity: int) -> None:
-        super().__init__(id, event_loop)
-        self.capacity = capacity
-        self.queue: Queue[Actor] = Queue()  # A list of waiting actors
+class ResourceArgs(TypedDict):
+    id: str
+    capacity: int
 
-    async def request(self, actor: Actor) -> None:
+
+class Resource(Actor):
+    def __init__(self, id: str, capacity: int, actor_system: ActorSystem) -> None:
+        super().__init__(id, actor_system)
+        self.id = id
+        self.capacity = capacity
+        self.queue: Queue[ActorProtocol] = Queue()  # A list of waiting actors
+
+    async def request(self, actor: ActorProtocol) -> None:
         if self.capacity > 0:
             self.capacity -= 1
         else:
@@ -24,8 +30,13 @@ class Resource(Actor):
     async def release(self) -> None:
         if self.queue:
             actor = await self.queue.get()
-            await actor.mailbox.put(
-                Message(type='resource_available', content=None, time=self.event_loop.simulation_time)
+            await actor.send_message(
+                fromId=self.id,
+                message=Message(
+                    type='resource_available',
+                    content=None,
+                    time=self.actor_system.event_loop.simulation_time
+                )
             )
         else:
             self.capacity += 1

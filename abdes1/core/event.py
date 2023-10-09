@@ -3,11 +3,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from abdes1.actors import Actor, Message
+    from abdes1.actors import Message
 
 
 @dataclass
 class Event:
     time: float
-    target_actor: Actor
+    target_actor_id: str
     message: Message
