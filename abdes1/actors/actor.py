@@ -17,22 +17,22 @@ class Actor:
 
     async def send_message(self, fromId: str, message: Message) -> None:
         # TODO Handle when mailbox is full / backpressure
-        print(f"Actor {self.id} queueing message {message} in mailbox")
+        print(f"From actor {fromId}: queueing message: {message} in mailbox for {self.id}")
         await self.mailbox.put(message)
 
     async def process_message(self, message: Message) -> None:
-        print(f"Actor {self} processing message {message}")
+        print(f"Actor {self.id} processing message: {message}")
         # TODO Implement message processing logic
         # TODO Validate message is for this actor
         # TODO Validate message format
-        print(f"Actor {self} processed message {message}")
+        print(f"Actor {self.id} processed message: {message}")
         pass
 
     async def run(self) -> None:
-        print(f"Actor {self} running")
+        print(f"Actor {self.id} running")
         while True:
             message = await self.mailbox.get()
-            print(f"Actor {self} handling mailbox message {message}")
+            print(f"Actor {self.id} handling mailbox message: {message}")
             if message.time > self.event_loop.simulation_time:
                 # Message is in the future!
                 # Reschedule the message if it's too early to process it

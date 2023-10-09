@@ -5,6 +5,8 @@ Provides an interactivve playground for experimenting with abdes1
 
 """
 import asyncio
+from prompt_toolkit.patch_stdout import patch_stdout  # type: ignore
+
 
 # scripts findability
 import sys
@@ -17,40 +19,43 @@ from examples.console import user_input_loop
 
 
 async def main():
-    print("creating event loop")
-    event_loop = EventLoop()
 
-    # Define a couple of actors
-    resource = Resource("resource1", event_loop, capacity=2)
-    process = Process("process1", event_loop)
+    with patch_stdout():
 
-    event_loop.actors.extend([resource, process])
+        print("creating event loop")
+        event_loop = EventLoop()
 
-    # Schedule an initial event
-    start_message = Message(type='start-simulation', content=None, time=0.0)
-    start_event = Event(time=0.0, target_actor=process, message=start_message)
-    event_loop.schedule_event(start_event)
+        # Define a couple of actors
+        resource = Resource("resource-1", event_loop, capacity=2)
+        process = Process("process-1", event_loop)
 
-    # Schedule all actors to run concurrently
-    actor_tasks = [asyncio.create_task(actor.run()) for actor in event_loop.actors]
+        event_loop.actors.extend([resource, process])
 
-    # Schedule the future event loop
-    event_loop_task = asyncio.create_task(event_loop.run())
+        # Schedule an initial event
+        start_message = Message(type='start-simulation', content=None, time=0.0)
+        start_event = Event(time=0.0, target_actor=process, message=start_message)
+        event_loop.schedule_event(start_event)
 
-    # Schedule the user input loop
-    input_loop_task = asyncio.create_task(user_input_loop(event_loop))
+        # Schedule all actors to run concurrently
+        actor_tasks = [asyncio.create_task(actor.run()) for actor in event_loop.actors]
 
-    # Schedule a couple more events
-    event_loop.schedule_event(Event(time=0.0,
-                              target_actor=resource,
-                              message=Message(type='user-message',
-                                              content='hello now', time=0.0)))
-    event_loop.schedule_event(Event(time=0.0,
-                              target_actor=resource,
-                              message=Message(type='user-message',
-                                              content='hello 10s', time=10.0)))
+        # Schedule the future event loop
+        event_loop_task = asyncio.create_task(event_loop.run())
 
-    await asyncio.gather(*actor_tasks, event_loop_task, input_loop_task)
+        # Schedule the user input loop
+        input_loop_task = asyncio.create_task(user_input_loop(event_loop))
+
+        # Schedule a couple more events
+        event_loop.schedule_event(Event(time=0.0,
+                                  target_actor=resource,
+                                  message=Message(type='user-message',
+                                                  content='hello now', time=0.0)))
+        event_loop.schedule_event(Event(time=0.0,
+                                  target_actor=resource,
+                                  message=Message(type='user-message',
+                                                  content='hello 10s', time=10.0)))
+
+        await asyncio.gather(*actor_tasks, event_loop_task, input_loop_task)
 
 
 if __name__ == '__main__':

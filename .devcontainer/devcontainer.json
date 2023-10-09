@@ -19,7 +19,12 @@
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
 			"settings": { 
-				"python.defaultInterpreterPath": "/usr/local/bin/python"
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				// pylance
+				"python.analysis.extraPaths": [
+					"/workspace/abdes1",
+					"/workspace/examples"
+				]
 			},
 			
 			// Add the IDs of extensions you want installed when the container is created.
@@ -41,6 +46,7 @@
 				"ms-toolsai.jupyter-keymap",
 				"ms-toolsai.jupyter-renderers",
 				"tamasfe.even-better-toml"
+				// Install copilot manually. It crashes on my iMac
 				// "github.copilot",
 				// "github.copilot-chat"
 				// "streetsidesoftware.code-spell-checker"

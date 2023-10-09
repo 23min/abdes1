@@ -147,6 +147,23 @@ strict_equality = true
 # module = "3rdpartylib.*"
 # ignore_missing_imports = true
 
+# Pylance
+[tool.pyright]
+include = ["abdes1", "examples"]
+exclude = []
+
+strict = ["abdes1"]
+typeCheckingMode = "strict"
+
+reportMissingImports = "information"
+reportMissingTypeStubs = "information"
+reportUnknownMemberType = "information"
+
+extraPaths = [
+    "abdes1",
+    "examples"
+]
+
 [tool.coverage.run]
 omit = ["tests/*", "setup.py", ".pytest_tmp/*"]
 
