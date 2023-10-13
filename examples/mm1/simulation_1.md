@@ -3,7 +3,7 @@
 Basic discrete-event simulation involving a queue: **The Single-Server Queueing System**.
 This is a cornerstone example in the world of simulation, often referred to as the M/M/1 queue in queueing theory.
 
-### Single-Server Queueing System:
+## Single-Server Queueing System:
 
 #### Concept:
 1. Customers arrive at a service station.
@@ -25,11 +25,46 @@ This is a cornerstone example in the world of simulation, often referred to as t
    - **Departure Event**: Remove customer from the server. If the queue has customers, start serving the next one and schedule its departure. Otherwise, set server to idle.
 4. Repeat until the desired simulation time or number of customers is reached.
 
-#### Abdes1 Implementation
+### Abdes1 Implementation
 
-...  ## TODO
+#### Replicate results from mm1.py
 
-#### Python Reference Implementation:
+We will strive for repeatable results that match those from mm1.py.
+There `random.seed(333)` is used and there is a `next_exponential` function that provides the next random number.
+These random numbers are used both for the arrival and for the departure of customers wrt the queue. But the model is failrly simplistic In a sense, he departure time is *predicted* based on the SERVICE_RATE. This is an optimization. In a model that resembles reality better, the service time would be decided, at random, inside the server. 
+
+In the first iteration, we can try to follow the simplistic m/m/1 model from mm1.py.
+
+At this time it is unknown whether the actor system, in it's current primitive state, has enough functionality, but we will discover (and fix that) along the way.
+
+#### Represent the M/M/1 simulation components with actors:
+
+##### Simulation Components
+
+- Arrivals = actor that generates customers
+- Queue = actor that contains customers 
+- Server = actor that serves customers
+
+Can we use an actor to represent a queue? 
+A message received from Arrivals is a customer entering the queue (enqueue).
+A message received from Server is a 'ready' message. A customer leaves the queue (a message is sent to the server that a customer wants to be served)
+
+##### Initialize the simulation:
+1. Create a configuration / setup for the simulation with actors and input/configuration.
+    SERVICE_RATE = 0.8  # Average customers served per time unit
+    ARRIVAL_RATE = 0.8  # Average customers arriving per time unit
+2. Create the actor system and actors
+    a. Arrivals: a kind of producer that generates customers based on ARRIVAL_RATE
+    b. Queue: a kind of container with FIFO queue behavior
+    c. Server: Receives a message (customer) and sends a message 'ready' to the queue after the random service time (based on SERVICE_RATE)
+3. Run the simulation (via actor_system.Run())
+    - Do we need to schedule a "stop" message
+4. Show the results
+    - Printed output
+    - Matplotlib plot
+
+
+### Python Reference Implementation:
 
 ```python
 import random

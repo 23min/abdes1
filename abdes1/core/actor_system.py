@@ -20,6 +20,7 @@ first iteration a DES compatible event loop will be used.
 """
 from __future__ import annotations
 from typing import Any, List, Optional, Type, TYPE_CHECKING
+import asyncio
 
 if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
@@ -28,16 +29,27 @@ from abdes1.core import Event, EventLoop
 
 
 class ActorSystem:
-
     def __init__(self) -> None:
         self.registry = Registry()
         self._event_loop = EventLoop(self)
         print("Actor system created")
 
+    async def run(self) -> None:
+        # TODO: Refactor to Actor System and place the tasks below under supervision
+
+        # Schedule all actors to run concurrently
+        _ = [asyncio.create_task(actor.run()) for actor in self.list_actors()]
+
+        # Schedule the future event loop
+        _ = asyncio.create_task(self._event_loop.run())
+
+        print("Actor system running")
+        await self._event_loop.run()
+
     # --- Registry
 
     def register_actor(self, actor_class: Type[ActorProtocol], *args: Any, **kwargs: Any) -> None:
-        kwargs.update({'actor_system': self})
+        kwargs.update({"actor_system": self})
         actor = actor_class(*args, **kwargs)
         self.registry.actors.append(actor)
         print(f"Actor {actor.id} registered")
