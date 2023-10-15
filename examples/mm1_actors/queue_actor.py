@@ -74,10 +74,10 @@ class QueueActor(Actor):
         # Validate message is for this actor
 
         if message.type == "customer":
-            logging.log_event(self.id, f"Message received from {message.fromId}: Customer {message.content} arrived!")
+            logging.log_event(self.id, f"Message received from '{message.fromId}': Customer {message.content} arrived!")
         elif message.type == "server-ready":
             self.server_ready = True
-            logging.log_event(self.id, f"Message received from {message.fromId}: Server ready!")
+            logging.log_event(self.id, f"Message received from '{message.fromId}': Server ready!")
         elif message.type == "get-state":
             state = f"Queue depth: {self._get_depth()}"
             print(state)  # TODO: Should really send a message back to the sender
@@ -108,16 +108,16 @@ class QueueActor(Actor):
         message_to_send = None
         if message.type == "customer" and self.server_ready:
             if self.queue.empty():
-                logging.log_event(self.id, f"Queue is empty. Sending customer {message.content} directly to server {self.server}")
+                logging.log_event(self.id, f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
                 message_to_send = Message(
                     type="customer",
                     fromId=self.id,
                     toId=self.server,
                     content=message.content,
-                    time=0.0,
+                    time=message.time,
                 )
             else:
-                logging.log_event(self.id, f"Queue is not empty. Dequeueing customer {message.content} and sending to server {self.server}. Queueing customer {message.content}")
+                logging.log_event(self.id, f"Queue is not empty. Dequeueing customer '{message.content}' and sending to '{self.server}'. Queueing customer '{message.content}'")
                 self._enqueue(message.content)
                 customer = await self._dequeue()
                 message_to_send = Message(
@@ -136,7 +136,7 @@ class QueueActor(Actor):
                 # As soon as a customer arrives, the customer will be sent to the sever
                 return
 
-            logging.log_event(self.id, f"Sending first customer in the queue ({customer}) to {self.server}")
+            logging.log_event(self.id, f"Sending first customer in the queue ({customer}) to '{self.server}'")
             message_to_send = Message(
                 type="customer",
                 fromId=self.id,
@@ -146,7 +146,7 @@ class QueueActor(Actor):
             )
 
         if message_to_send is not None:
-            self.actor_system.schedule_event(Event(time=0.0, message=message_to_send))
+            self.actor_system.schedule_event_from_now(Event(time=0.0, message=message_to_send))
         else:
             raise Exception("Invalid message type.")
 
@@ -159,8 +159,8 @@ class QueueActor(Actor):
         # return await self.queue.get()
         try:
             async with asyncio.timeout_at(asyncio.get_running_loop().time() + 0.01):
-                logging.log_event(self.id, f"Got item off the queue. Queue size: {self.queue.qsize()}")
                 customer = await self.queue.get()
+                logging.log_event(self.id, f"Got item '{customer}' off the queue. Queue size: {self.queue.qsize()}")
                 return customer
             # return await asyncio.wait_for(self.queue.get(), timeout=1)
             # print(f"[{self.id}] Message received from {message.fromId}: Serving customer {customer}...")

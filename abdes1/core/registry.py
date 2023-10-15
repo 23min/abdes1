@@ -20,7 +20,7 @@ class Registry:
 
     def register_actor(self, actor: ActorProtocol) -> None:
         self.actors.append(actor)
-        logging.log_event("-registry-", f"Actor {actor.id} registered")
+        logging.log_event("-registry-", f"Actor '{actor.id}' registered")
 
     def find_actor(self, target_actor: str) -> Optional[ActorProtocol]:
         for actor in self.actors:
@@ -28,5 +28,5 @@ class Registry:
                 return actor
             else:
                 continue
-        logging.log_event("-registry-", f"Actor {target_actor} not found")
+        logging.log_event("-registry-", f"Actor '{target_actor}' not found")
         return None

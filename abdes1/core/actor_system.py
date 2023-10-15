@@ -56,7 +56,7 @@ class ActorSystem:
         kwargs.update({"actor_system": self})
         actor = actor_class(*args, **kwargs)
         self.registry.actors.append(actor)
-        logging.log_event("-system-", f"Actor {actor.id} registered")
+        logging.log_event("-system-", f"Actor '{actor.id}' registered")
 
     def actor(self, actor_id: str) -> Optional[ActorProtocol]:
         return self.registry.find_actor(actor_id)
@@ -71,6 +71,9 @@ class ActorSystem:
 
     def schedule_event(self, event: Event) -> None:
         self._event_loop.schedule_event(event)
+
+    def schedule_event_from_now(self, event: Event) -> None:
+        self._event_loop.schedule_event_from_now(event)
 
     @property
     def event_loop(self) -> EventLoop:

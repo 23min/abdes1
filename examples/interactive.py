@@ -60,7 +60,7 @@ async def main():
                 ),
             ),
         )
-        actor_system.schedule_event(
+        actor_system.schedule_event_from_now(
             Event(
                 time=10.0,
                 message=Message(

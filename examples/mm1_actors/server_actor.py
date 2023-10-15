@@ -54,7 +54,7 @@ class ServerActor(Actor):
         if message.type == "customer":
             logging.log_event(
                 self.id,
-                f"Message received from {message.fromId}: Customer {message.content} ready to be served!",
+                f"Message received from '{message.fromId}': Customer '{message.content}' ready to be served!",
             )
             # await self.process_message(message)
         else:
@@ -81,7 +81,6 @@ class ServerActor(Actor):
         # We just send a message to the queue that the server is ready
         event = Event(
             time=service_time,
-            # target_actor_id=target_actor or "",  # TODO Should be a 'deadletter' actor
             message=Message(
                 type="server-ready",
                 fromId=self.id,
@@ -90,6 +89,7 @@ class ServerActor(Actor):
                 time=service_time,
             ),
         )
-        self.actor_system.schedule_event(event)
+
+        self.actor_system.schedule_event_from_now(event)
 
     # --- Internal stuff

@@ -100,7 +100,7 @@ class LoadGeneratorActor(Actor):
         # What is the time of the last event? duration
 
         # Schedule a batch of events
-        arrival_time = self.actor_system.event_loop.current_time
+        scheduled_time = self.actor_system.event_loop.current_time
 
         # Calculate the number of events to generate
         num_events = int(self.event_rate * self.duration)
@@ -108,22 +108,23 @@ class LoadGeneratorActor(Actor):
         # Schedule events
         for i in range(num_events):
             next_arrival_time = next_exponential(self.event_rate)
-            arrival_time += next_arrival_time
+            scheduled_time += next_arrival_time
+            customer = f"c_{i}"
             event = Event(
-                time=arrival_time,
+                time=scheduled_time,
                 # target_actor_id=target_actor or "",  # TODO Should be a 'deadletter' actor
                 message=Message(
                     type="customer",
                     fromId=self.id,
                     toId=self.destination,
-                    content=f"c_{i}",
-                    time=arrival_time,
+                    content=customer,
+                    time=scheduled_time,
                 ),
             )
             # print(f"[{self.id:10}] Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}")
             logging.log_event(
                 self.id,
-                f"Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}",
+                f"Generated arrival of '{customer}' after {next_arrival_time:.2f} at simulation time: {scheduled_time:.2f}",
             )
             self.actor_system.schedule_event(event)
             await asyncio.sleep(0.01)

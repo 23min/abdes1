@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 @dataclass
 class Event:
     time: float
-    # fromId: str  # yes, needed! for the event loop to send the message
-    # target_actor_id: str
     message: Message
+
+    def __lt__(self: Event, other: Event):
+        # Note that we've reversed the operands here, since we want a max-heap.
+        return other.time < self.time

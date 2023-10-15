@@ -15,19 +15,20 @@ class Actor:
         self.mailbox: Queue[Message] = Queue()
         self.actor_system = actor_system
         # self.event_loop = event_loop
-        logging.log_event(self.id, f"Actor {self.id} created")
+        logging.log_event(self.id, f"Actor '{self.id}' created")
 
     async def run(self) -> None:
-        logging.log_event(self.id, f"Actor {self.id} running")
+        logging.log_event(self.id, f"Actor '{self.id}' running")
         while True:
             message = await self.mailbox.get()
             logging.log_event(self.id, f"Handling mailbox message from '{message.fromId}': {message}. Mailbox size now [{self.mailbox.qsize()}].")
-            if message.time > self.actor_system.event_loop.current_time:
-                logging.log_event(self.id, f" ==> Message is in the future! {message.time} > {self.actor_system.event_loop.current_time}")
-                # Message is in the future!
-                # Reschedule the message if it's too early to process it
-                # TODO Can't sleep this long. The simulation time may have advanced!
-                await asyncio.sleep(message.time - self.actor_system.event_loop.current_time)
+            # TODO: Does time have any business here?
+            # if message.time > self.actor_system.event_loop.current_time:
+            #     logging.log_event(self.id, f" ==> Message is in the future! {message.time} > {self.actor_system.event_loop.current_time}")
+            #     # Message is in the future!
+            #     # Reschedule the message if it's too early to process it
+            #     # TODO Can't sleep this long. The simulation time may have advanced!
+            #     await asyncio.sleep(message.time - self.actor_system.event_loop.current_time)
             await self.process_message(message)
             await asyncio.sleep(0.01)
 
@@ -36,8 +37,8 @@ class Actor:
 
     async def send_message(self, message: Message) -> None:
         # TODO Handle when mailbox is full / backpressure
+        self.mailbox.put_nowait(message)
         logging.log_event(self.id, f"Adding mailbox Message from '{message.fromId}': {message}. Mailbox size now [{self.mailbox.qsize()}]. ")
-        await self.mailbox.put(message)
 
     async def process_message(self, message: Message) -> None:
         print(f"Actor {self.id} processing message: {message}")
