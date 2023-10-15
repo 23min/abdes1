@@ -9,5 +9,6 @@ if TYPE_CHECKING:
 @dataclass
 class Event:
     time: float
-    target_actor_id: str
+    # fromId: str  # yes, needed! for the event loop to send the message
+    # target_actor_id: str
     message: Message

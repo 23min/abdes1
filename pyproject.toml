@@ -37,6 +37,7 @@ dev = [
     "mypy >=1.3.0",
     "pylint >=2.12.2",
     "pytest >=7.0.0",
+    "pytest-asyncio >=0.15.0",
     "pytest-cov >=3.0.0",
     "pytest-mock >=3.7.0",
     "pytest-timeout >=2.1.0",
@@ -211,14 +212,11 @@ strict_equality = true
 [tool.pyright]
 include = ["abdes1", "examples"]
 exclude = []
-
 strict = ["abdes1"]
 typeCheckingMode = "strict"
-
 reportMissingImports = "information"
 reportMissingTypeStubs = "information"
 reportUnknownMemberType = "information"
-
 extraPaths = ["abdes1", "examples"]
 
 [tool.coverage.run]
@@ -228,3 +226,4 @@ omit = ["tests/*", "setup.py", ".pytest_tmp/*"]
 addopts = ["--cov=.", "--cov-report=", "--no-cov-on-fail"]
 timeout = 10
 filterwarnings = []
+asyncio_mode = "auto"

@@ -33,8 +33,15 @@ async def main():
         # event_loop.actors.extend([resource, process])
 
         # Schedule an initial event
-        start_message = Message(type="start-simulation", content=None, time=0.0)
-        start_event = Event(time=0.0, target_actor_id="process-1", message=start_message)
+        start_message = Message(
+            type="start-simulation",
+            fromId="interactive.main",
+            toId="process-1",
+            content=None,
+            time=0.0,
+        )
+        # start_event = Event(fromId="interactive.main", time=0.0, target_actor_id="process-1", message=start_message)
+        start_event = Event(time=0.0, message=start_message)
         actor_system.schedule_event(start_event)
 
         # Schedule the user input loop
@@ -44,9 +51,10 @@ async def main():
         actor_system.schedule_event(
             Event(
                 time=0.0,
-                target_actor_id="resource-1",
                 message=Message(
                     type="user-message",
+                    fromId="interactive.main",
+                    toId="resource-1",
                     content="hello now",
                     time=0.0,
                 ),
@@ -55,9 +63,10 @@ async def main():
         actor_system.schedule_event(
             Event(
                 time=10.0,
-                target_actor_id="resource-1",
                 message=Message(
                     type="user-message",
+                    fromId="interactive.main",
+                    toId="resource-1",
                     content="hello 10s",
                     time=10.0,
                 ),

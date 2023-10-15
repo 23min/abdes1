@@ -33,7 +33,7 @@ def get_delay() -> str:
 
 
 def get_target_actor() -> str:
-    return session.prompt(HTML('<aaa fg="black" bg="gold">Enter the target actor (\'l\' to list, \'r\' to start over, \'q\' to quit):</aaa> '))
+    return session.prompt(HTML("<aaa fg=\"black\" bg=\"gold\">Enter the target actor ('l' to list, 'r' to start over, 'q' to quit):</aaa> "))
 
 
 def is_float(s: str):
@@ -45,14 +45,12 @@ def is_float(s: str):
 
 
 async def user_input_loop(actor_system: ActorSystem) -> None:
-
     loop = asyncio.get_running_loop()
 
     while True:
-
         user_message: str = await loop.run_in_executor(None, get_user_input)
         print_formatted_text(HTML(f"<gold>You entered: {user_message}</gold>"))
-        if user_message.lower() == 'q':
+        if user_message.lower() == "q":
             break
 
         delay_s: str = await loop.run_in_executor(None, get_delay)
@@ -64,17 +62,16 @@ async def user_input_loop(actor_system: ActorSystem) -> None:
         actor_maybe = None
 
         while True:  # Loop until a valid actor is entered or user decides to break out
-
             target_actor: str = await loop.run_in_executor(None, get_target_actor)
 
-            if target_actor.lower() == 'l':
+            if target_actor.lower() == "l":
                 print_formatted_text(HTML("<gold>Actors:</gold>"))
 
                 for actor in actor_system.list_actors():
                     print_formatted_text(HTML(f"<gold>   {actor.id}</gold>"))
                 continue  # Go back to the start of the inner loop to ask for the actor again
 
-            if target_actor.lower() == 'r':
+            if target_actor.lower() == "r":
                 break  # Break out of the inner loop to start the process again
 
             actor_maybe = actor_system.find_actor(target_actor)
@@ -87,21 +84,26 @@ async def user_input_loop(actor_system: ActorSystem) -> None:
             break
 
         # If user chooses to start over, skip the remaining logic for this iteration
-        if target_actor.lower() == 'r':
+        if target_actor.lower() == "r":
             continue
-        if target_actor.lower() == 'q':
+        if target_actor.lower() == "q":
             break
 
         time = text_to_float(delay_s, lower_bound=0.0, upper_bound=10.0)
-        message = Message(type='user-message', content=user_message, time=time)
+        message = Message(
+            type="user-message",
+            fromId="console",
+            toId=target_actor,
+            content=user_message,
+            time=time,
+        )
         event = Event(
             time=time,
-            target_actor_id=target_actor,
-            message=message
+            message=message,
         )
         actor_system.schedule_event(event)
 
-        print_formatted_text(HTML(f"<cyan>Simulation time (s) {actor_system.event_loop.simulation_time}</cyan>"))
+        print_formatted_text(HTML(f"<cyan>Simulation time (s) {actor_system.event_loop.current_time}</cyan>"))
 
         # The rest of the user input loop...
         # When you need to interact with async code, use:
@@ -110,7 +112,7 @@ async def user_input_loop(actor_system: ActorSystem) -> None:
         # TODO Send shutdown event
         # TODO Support shutdown in application
 
-    print('exiting console')
+    print("exiting console")
 
 
 def text_to_float(text: str, lower_bound: float = 0.0, upper_bound: float = 1.0):

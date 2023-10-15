@@ -1,4 +1,3 @@
-
 from asyncio import Queue
 from typing import TypedDict
 
@@ -29,14 +28,15 @@ class Resource(Actor):
 
     async def release(self) -> None:
         if self.queue:
-            actor = await self.queue.get()
+            actor = await self.queue.get()  # TODO Actors in the queue or actor Ids?
             await actor.send_message(
-                fromId=self.id,
                 message=Message(
-                    type='resource_available',
+                    type="resource_available",
+                    fromId=self.id,
+                    toId=actor.id,
                     content=None,
-                    time=self.actor_system.event_loop.simulation_time
-                )
+                    time=self.actor_system.event_loop.current_time,
+                ),
             )
         else:
             self.capacity += 1

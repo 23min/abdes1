@@ -31,11 +31,11 @@ This is a cornerstone example in the world of simulation, often referred to as t
 
 We will strive for repeatable results that match those from mm1.py.
 There `random.seed(333)` is used and there is a `next_exponential` function that provides the next random number.
-These random numbers are used both for the arrival and for the departure of customers wrt the queue. But the model is failrly simplistic In a sense, he departure time is *predicted* based on the SERVICE_RATE. This is an optimization. In a model that resembles reality better, the service time would be decided, at random, inside the server. 
+These random numbers are used both for the arrival and for the departure of customers wrt the queue. But the model is failrly simplistic In a sense, he departure time is *predicted* based on the SERVICE_RATE. This is an optimization. In a model that resembles reality better, the service time would be decided inside the server (at random), not inside the queue. 
 
 In the first iteration, we can try to follow the simplistic m/m/1 model from mm1.py.
 
-At this time it is unknown whether the actor system, in it's current primitive state, has enough functionality, but we will discover (and fix that) along the way.
+At this time it is unknown whether the actor system, in it's current primitive state, has enough functionality,. We will discover (and fix that) along the way.
 
 #### Represent the M/M/1 simulation components with actors:
 
@@ -49,20 +49,54 @@ Can we use an actor to represent a queue?
 A message received from Arrivals is a customer entering the queue (enqueue).
 A message received from Server is a 'ready' message. A customer leaves the queue (a message is sent to the server that a customer wants to be served)
 
-##### Initialize the simulation:
+##### Design & Implementation
 1. Create a configuration / setup for the simulation with actors and input/configuration.
-    SERVICE_RATE = 0.8  # Average customers served per time unit
-    ARRIVAL_RATE = 0.8  # Average customers arriving per time unit
-2. Create the actor system and actors
+    Let's use Json to start with.
+    - Simulation configuration:
+        - SERVICE_RATE = 0.8  # Average customers served per time unit
+        - ARRIVAL_RATE = 0.8  # Average customers arriving per time unit
+    - System configuration
+        - verbosity for print statements
+2. Define the actor system and actors.
     a. Arrivals: a kind of producer that generates customers based on ARRIVAL_RATE
     b. Queue: a kind of container with FIFO queue behavior
     c. Server: Receives a message (customer) and sends a message 'ready' to the queue after the random service time (based on SERVICE_RATE)
+    d. Customer: this can just be an id (str)
+    Put this in the same Json file?
+3. Define the message types / protocol
+    Arrivals produces message "customer" with a customer Id
+    Server produces message "server ready"
+    Server handles message "serve customer"
+    Queue handles messages "customer arrived" and "server ready"
+3. Build the actors.
+    - Code organization. Each actor should probably live in their own .py file. 
+    - Import the Abdes1 package. Do we still have the interactive console? (No). Do we need it?
 3. Run the simulation (via actor_system.Run())
-    - Do we need to schedule a "stop" message
+    - Do we need to schedule a "stop" message? How is this configured or when is it sent?
+    - python -m mm1_actors.py
 4. Show the results
     - Printed output
-    - Matplotlib plot
+    - Matplotlib plot (output to .png?)
 
+#### Other concerns
+- Format for configuration. Json, yaml or something else? Json might be the most straightforward?
+- Where do the modules live? Abdes1 is probably supposed to be used as a library. Try to go into that direction.
+- Should we have a console, to be able to interact with the system?
+- How is the simulation kicked off? At the beginning of the simulation, the server is ready, but
+    if it is not getting a customer, how can it send a 'server ready' message?
+- Nondeterminism, cycles, ... ?
+
+TODO: Add a description of the system
+TODO: Add a description of the actors
+TODO: Add a description of the events
+TODO: Add a description of the messages
+TODO: Add a description of the simulation
+TODO: Add a description of the results
+TODO: Add a description of the analysis
+TODO: Add a description of the conclusions
+TODO: Add a description of the next steps
+TODO: Add a description of the references
+TODO: :) 
 
 ### Python Reference Implementation:
 

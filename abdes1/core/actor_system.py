@@ -31,7 +31,7 @@ from abdes1.core import Event, EventLoop
 class ActorSystem:
     def __init__(self) -> None:
         self.registry = Registry()
-        self._event_loop = EventLoop(self)
+        self._event_loop = EventLoop(True, self)  # TODO: Paramatrize verbosity
         print("Actor system created")
 
     async def run(self) -> None:
@@ -41,10 +41,13 @@ class ActorSystem:
         _ = [asyncio.create_task(actor.run()) for actor in self.list_actors()]
 
         # Schedule the future event loop
-        _ = asyncio.create_task(self._event_loop.run())
+        event_loop_task = asyncio.create_task(self._event_loop.run())
 
         print("Actor system running")
-        await self._event_loop.run()
+        # await self._event_loop.run()
+        await event_loop_task
+
+        print("Actor system stopped")
 
     # --- Registry
 

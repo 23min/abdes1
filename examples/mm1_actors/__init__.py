@@ -1,4 +1,6 @@
-from .mm1_actors import *
+from .queue_actor import *
+from .server_actor import *
+from .load_generator_actor import *
 
 __all__ = [
     "QueueActor",
