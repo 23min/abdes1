@@ -17,7 +17,8 @@ In order to simulate events arriving at a given rate, can generate events "up fr
 This is done by generating a batch of events at the start of the simulation.
 """
 import random
-from typing import Optional, TypedDict
+import asyncio
+from typing import TypedDict
 from math import log
 
 # from enum import Enum
@@ -26,6 +27,7 @@ from math import log
 # from typing import Any, Coroutine
 from abdes1.core import ActorSystem, Event
 from abdes1.actors import Actor, Message
+from abdes1.utils import logging
 
 
 def next_exponential(rate: float) -> float:
@@ -33,8 +35,7 @@ def next_exponential(rate: float) -> float:
 
 
 class LoadGeneratorActorArgs(TypedDict):
-    """_summary_
-
+    """
     Members:
         id (str): Name of the actor
         event_rate (float): average number of events generated per time unit
@@ -82,13 +83,15 @@ class LoadGeneratorActor(Actor):
     # Or the number of events generated?
     async def send_message(self, message: Message) -> None:
         if message.type == "start":
-            await self.process_message(message, target_actor=message.toId)
-        pass
+            # print(f"[{self.id:10}] Start message received")
+            logging.log_event(self.id, "Start message received")
+            # await self.process_message(message, target_actor=message.toId)
+        await super().send_message(message)
 
     # "customer" message: customer arrives
     # Server processes customer
     # When done, server sends message to queue "server-ready"
-    async def process_message(self, message: Message, target_actor: Optional[str] = None) -> None:
+    async def process_message(self, message: Message) -> None:
         # based on event_rate (arrival_rate), generate a batch of events
         # How many events? numevents
         # What is the duration of the batch? duration
@@ -117,7 +120,12 @@ class LoadGeneratorActor(Actor):
                     time=arrival_time,
                 ),
             )
-            print(f"[{self.id:10}] Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}")
+            # print(f"[{self.id:10}] Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}")
+            logging.log_event(
+                self.id,
+                f"Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}",
+            )
             self.actor_system.schedule_event(event)
+            await asyncio.sleep(0.01)
 
     # --- Internal stuff

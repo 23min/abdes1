@@ -15,6 +15,7 @@ In an m/m/1 queueing system, there is only one server.
 The id of this server is passed to the queue actor during initialization.
 """
 from asyncio import Queue
+
 import asyncio
 from typing import Optional, TypedDict
 from enum import Enum
@@ -23,6 +24,7 @@ from enum import Enum
 # from typing import Any, Coroutine
 from abdes1.core import ActorSystem, Event
 from abdes1.actors import Actor, Message
+from abdes1.utils import logging
 
 
 # Having fun with queue types. For now we only use FIFO in m/m/1
@@ -72,20 +74,19 @@ class QueueActor(Actor):
         # Validate message is for this actor
 
         if message.type == "customer":
-            print(f"[{self.id:10}] Message received from {message.fromId}: Customer {message.content} arrived!")
-            await self.process_message(message)
+            logging.log_event(self.id, f"Message received from {message.fromId}: Customer {message.content} arrived!")
         elif message.type == "server-ready":
             self.server_ready = True
-            print(f"[{self.id:10}] Message received from {message.fromId}: Server ready!")
-            await self.process_message(message)
+            logging.log_event(self.id, f"Message received from {message.fromId}: Server ready!")
         elif message.type == "get-state":
             state = f"Queue depth: {self._get_depth()}"
             print(state)  # TODO: Should really send a message back to the sender
         else:
             raise Exception(
-                f"[{self.id:10}] Invalid message type: {message.type}. \
-                Valid message types are: 'customer', 'server-ready'"
+                f"Invalid message type: {message.type}. Valid message types are: 'customer', 'server-ready'",
             )
+
+        await super().send_message(message)
 
     # Arrival message: customer arrives -> enqueue
     # Server ready message: server ready ->
@@ -98,6 +99,8 @@ class QueueActor(Actor):
     #    If queue is not empty, dequeue message and send to server.
     #    If queue is empty, set server state to ready (server_ready = True)
     async def process_message(self, message: Message) -> None:
+        logging.log_event(self.id, f"Processing message: {message}")
+
         if message.type == "customer" and not self.server_ready:
             self._enqueue(message.content)
             return
@@ -105,7 +108,7 @@ class QueueActor(Actor):
         message_to_send = None
         if message.type == "customer" and self.server_ready:
             if self.queue.empty():
-                # Send directly to server
+                logging.log_event(self.id, f"Queue is empty. Sending customer {message.content} directly to server {self.server}")
                 message_to_send = Message(
                     type="customer",
                     fromId=self.id,
@@ -114,7 +117,7 @@ class QueueActor(Actor):
                     time=0.0,
                 )
             else:
-                # Add incoming customer to queue and dequeue next customer
+                logging.log_event(self.id, f"Queue is not empty. Dequeueing customer {message.content} and sending to server {self.server}. Queueing customer {message.content}")
                 self._enqueue(message.content)
                 customer = await self._dequeue()
                 message_to_send = Message(
@@ -125,15 +128,15 @@ class QueueActor(Actor):
                     time=0.0,
                 )
 
-        if message.type == "server-ready" or message.content == "c_0":
+        if message.type == "server-ready":  # or message.content == "c_0":
             customer = await self._dequeue()
 
             if customer is None:
                 # No customers in queue, but server state is ready.
                 # As soon as a customer arrives, the customer will be sent to the sever
-                # raise Exception("Server is ready, but no customers in queue. This should not happen.")
                 return
 
+            logging.log_event(self.id, f"Sending first customer in the queue ({customer}) to {self.server}")
             message_to_send = Message(
                 type="customer",
                 fromId=self.id,
@@ -142,18 +145,10 @@ class QueueActor(Actor):
                 time=0.0,
             )
 
-            # event = Event(
-            #     time=0.0,
-            #     message=Message(
-            #         type="customer",
-            #         fromId=self.id,
-            #         toId=self.server,
-            #         content=customer,
-            #         time=0.0,
-            #     ),
-            # )
-
-        self.actor_system.schedule_event(Event(time=0.0, message=message_to_send))
+        if message_to_send is not None:
+            self.actor_system.schedule_event(Event(time=0.0, message=message_to_send))
+        else:
+            raise Exception("Invalid message type.")
 
     # --- Internal stuff
 
@@ -162,9 +157,9 @@ class QueueActor(Actor):
 
     async def _dequeue(self) -> Optional[str]:
         # return await self.queue.get()
-        print(f"Getting item of the queue. Queue size: {self.queue.qsize()}")
         try:
-            async with asyncio.timeout_at(asyncio.get_running_loop().time() + 1):
+            async with asyncio.timeout_at(asyncio.get_running_loop().time() + 0.01):
+                logging.log_event(self.id, f"Got item off the queue. Queue size: {self.queue.qsize()}")
                 customer = await self.queue.get()
                 return customer
             # return await asyncio.wait_for(self.queue.get(), timeout=1)

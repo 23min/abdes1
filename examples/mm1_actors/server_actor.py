@@ -11,11 +11,12 @@ A server actor is an actor that behaves like a service:
 In an m/m/1 queueing system, there is only one server.
 """
 import random
-from typing import Optional, TypedDict
+from typing import TypedDict
 from math import log
 
 from abdes1.core import ActorSystem, Event
 from abdes1.actors import Actor, Message
+from abdes1.utils import logging
 
 
 def next_exponential(rate: float) -> float:
@@ -50,24 +51,30 @@ class ServerActor(Actor):
         # TODO Validate sender?
         # Validate message is for this actor
 
-        print(f"[{self.id:10}] Message received from {message.fromId}: Customer {message.content} ready to be served!")
         if message.type == "customer":
-            await self.process_message(
-                message,
+            logging.log_event(
+                self.id,
+                f"Message received from {message.fromId}: Customer {message.content} ready to be served!",
             )
+            # await self.process_message(message)
         else:
             raise Exception(
-                f"[{self.id:10}] Invalid message type: {message.type}. \
-                Valid message types are: 'arrival', 'server-ready'"
+                f"Invalid message type: {message.type}. Valid message types are: 'arrival', 'server-ready'",
             )
+
+        await super().send_message(message)
 
     # "customer" message: customer arrives
     # Server processes customer
     # When done, server sends message to queue "server-ready"
-    async def process_message(self, message: Message, target_actor: Optional[str] = None) -> None:
+    async def process_message(self, message: Message) -> None:
         # Calculate random service time from service rate
         service_time = random.expovariate(self.servce_rate)
-        print(f"[{self.id:10}] Customer {message.content} service time: {service_time:.2f}")
+
+        logging.log_event(
+            self.id,
+            f"Customer {message.content} service time: {service_time:.2f}",
+        )
 
         # Schedule departure event
         # The customer doesn't actually depart, he/she evaporates

@@ -10,17 +10,17 @@ from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
+from abdes1.utils import logging
 
 
 class Registry:
-
     def __init__(self) -> None:
         self.actors: List[ActorProtocol] = []
-        print("Registry created")
+        logging.log_event("-registry-", "Registry created")
 
     def register_actor(self, actor: ActorProtocol) -> None:
         self.actors.append(actor)
-        print(f"Actor {actor.id} registered")
+        logging.log_event("-registry-", f"Actor {actor.id} registered")
 
     def find_actor(self, target_actor: str) -> Optional[ActorProtocol]:
         for actor in self.actors:
@@ -28,5 +28,5 @@ class Registry:
                 return actor
             else:
                 continue
-        print(f"Actor {target_actor} not found")
+        logging.log_event("-registry-", f"Actor {target_actor} not found")
         return None

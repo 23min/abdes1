@@ -7,6 +7,7 @@ from abdes1.core import EventLoop
 from abdes1.core import Registry
 from abdes1.core import ActorSystem
 from abdes1.core import ActorProtocol
+from abdes1.utils import logging
 
 __all__ = [
     "Actor",
@@ -18,4 +19,5 @@ __all__ = [
     "Process",
     "Event",
     "EventLoop",
+    "logging",
 ]
