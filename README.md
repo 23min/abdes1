@@ -39,7 +39,7 @@ Investigate whether everything can/should be an actor. The advantage if the cons
 
 With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here Erlang can be of inspiration. 
 
-[ ] Implement what is needed in a DES & try to run a minimal simulation
+[ ] Implement what is needed in a DES & try to run a minimal simulation (M/M/1 Single Server queueing system)
 
 - Event calendar / Fuuture Event List / Loop
 - State management / Ability to interrogate state / logging 
@@ -54,16 +54,22 @@ With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here 
 - Random number genertion / how is randomness achieved or determinism guaranteed?
 - GUI / Design, administration and monitoring
 
-[ ] Implement a Single Server Queueing system (M/M/1 queue)
-...
+Also:
 
-[ ] Performance
+- Factor out all DES/simulation related code from the actor system package. The actor system should be usable as a generic actor system. Take inspiration from Ptolemy II [^1]
+
+[ ] Misc
+- Workflow/usage. Should it be a library or have a GUI (web based or native?)
+- Distribution: should it be possible to scale a simulation to run on different threads/processes/nodes?
+
 
 ## Q&A
 
 Q: Why not use an existing actor framework, such as Elixir with BEAM, Akka (Pykka) etc? And why not use an existing simulation library like SimPy?
 
-A: I was unable to find any good references on existing actor based discrete event simulation frameworks, projects or research where the two are combined.
+A: I was unable to find any good references on existing actor based discrete event simulation frameworks, projects or research where the two are combined. (update[^1])
 Either it's impractical or it's genius. I'm about to find out! 
 In addition, I wish to fully understand and control the simulation environment and the modeling. What better way than to create from scratch? 
 
+Footnote:
+[^1]: Since then, I have found the [Ptolemy Project](https://ptolemy.berkeley.edu/)).
