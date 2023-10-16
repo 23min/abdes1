@@ -47,7 +47,7 @@ async def test_queue_can_enqueue() -> None:
     assert q.server == "dummy-server"
 
     m = Message(
-        type="arrival",
+        type="customer",
         from_id="pytest",
         to_id="q",
         content=None,
