@@ -100,14 +100,32 @@ class QueueActor(Actor):
     async def process_message(self, message: Message) -> None:
         logging.log_event(self.id, f"Processing message: {message}")
 
-        if message.type == "customer" and not self.server_ready:
+        if message.type == "customer" and message.content != "c_0":  # and not self.server_ready:
             self._enqueue(message.time, message.content)
+            logging.log_event(self.id, f"Queueing customer '{message.content}'. Queue size: {self.queue.qsize()}")
+
+            # Send metric to stats actor
+            self.actor_system.schedule_event_from_now(
+                Event(
+                    time=0.0,
+                    message=Message(
+                        type="customer-queued",
+                        from_id=self.id,
+                        to_id="stats",
+                        content=None,
+                        time=message.time,
+                    ),
+                ),
+            )
+
             return
 
         message_to_send = None
-        if message.type == "customer" and self.server_ready:
+        if message.type == "customer":  # or message.content == "c_0":  # and self.server_ready:
             if self.queue.empty():
                 logging.log_event(self.id, f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
+                # reset server_ready state
+                self.server_ready = False
                 message_to_send = Message(
                     type="customer",
                     from_id=self.id,

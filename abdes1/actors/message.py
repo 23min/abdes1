@@ -9,3 +9,4 @@ class Message:
     from_id: str  # todo this should be an address
     to_id: str  # todo this should be an address
     time: float  # Simulation time when the message should be processed
+    # TODO: Perhaps have "scheduled_time" and "processed_time" fields

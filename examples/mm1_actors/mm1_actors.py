@@ -3,27 +3,29 @@ mm1-actors.py
 
 Implementation of an m/m/1 queueing system with actors
 
-TODO: Read the confuguration from a file
-Who reads the configuraiton? The main function or the actor?
-The actor can only receive messages. So the main function should read the configuration and send it to the actor.
-Before we read from a file, try to get it to work with a hardcoded configuration.
+1. Read the confuguration from a file
 
-TODO: Create an instance of the actor system
+    Who reads the configuraiton? The main function or the actor?
+    The actor can only receive messages. So the main function should read the configuration and send it to the actor.
+    Before we read from a file, try to get it to work with a hardcoded configuration.
 
-TODO: Create an instance of the queue
+2. Create an instance of the actor system
 
-TODO: Create an instance of the server
+3. Create an instance of the queue
 
-TODO: What about the arrivals? A customer generator. Create an instance of the customer generator
+4. Create an instance of the server
 
-TODO: Schedule an initial event to start the simulation
+5. What about the arrivals? A customer generator. Create an instance of the customer generator
 
-TODO: Schedule a stop event or define a stop condition
+6. Schedule an initial event to start the simulation
 
-TODO: Run the simulation
+7. Schedule a stop event or define a stop condition
 
-TODO: Print the results / statistics / show the plot
+8. Run the simulation
 
+9. Gather the metrics
+
+10. rint the results / statistics / show the plot
 """
 import asyncio
 import argparse
@@ -35,7 +37,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 from abdes1 import ActorSystem, Event, Message
-from examples import QueueActor, QueueType, ServerActor, LoadGeneratorActor
+from examples import LoadGeneratorActor, QueueActor, QueueType, ServerActor, StatsActor
 
 # create a config schema
 # from typing import TypedDict
@@ -62,15 +64,21 @@ class LoadGeneratorConfig:
     destination: str
 
 
-def load_config(path: str) -> Tuple[QueueConfig, ServerConfig, LoadGeneratorConfig]:
+@dataclass
+class StatsConfig:
+    id: str
+
+
+def load_config(path: str) -> Tuple[QueueConfig, ServerConfig, LoadGeneratorConfig, StatsConfig]:
     with open(path, "r") as f:
         config_data = json.load(f)
 
         queue_config = QueueConfig(**config_data["queue_config"])
         server_config = ServerConfig(**config_data["server_config"])
         load_generator_config = LoadGeneratorConfig(**config_data["load_generator_config"])
+        stats_config = StatsConfig(**config_data["stats_config"])
 
-        return (queue_config, server_config, load_generator_config)
+        return (queue_config, server_config, load_generator_config, stats_config)
 
 
 def get_metrics() -> Tuple[list[float], List[int]]:
@@ -113,12 +121,15 @@ async def main(config_file: Optional[str]) -> None:
         load_generator_config = LoadGeneratorConfig(
             id="arrivals",
             event_rate=1.0,
-            duration=10.0,
+            duration=100.0,
             destination="queue",
+        )
+        stats_config = StatsConfig(
+            id="stats",
         )
     else:
         # read the configuration from a file
-        queue_config, server_config, load_generator_config = load_config(config_file)
+        queue_config, server_config, load_generator_config, stats_config = load_config(config_file)
 
     # Create an instance of the actor system
     actor_system = ActorSystem()
@@ -149,6 +160,8 @@ async def main(config_file: Optional[str]) -> None:
     # send a configuration message to the customer generator
     # customer_generator = actor_system.get_actor("customer-generator-1")
     # customer_generator.send_message(Message(type="configure", content=load_config(), time=0.0))
+
+    actor_system.register_actor(StatsActor, **asdict(stats_config))
 
     # Schedule an initial event 'server-ready' so that the server can start processing
     server_ready_message = Message(type="server-ready", from_id="mm1-actors", to_id="queue", content=None, time=0.0)
