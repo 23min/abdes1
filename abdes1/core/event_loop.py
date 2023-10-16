@@ -8,13 +8,8 @@ if TYPE_CHECKING:
 from abdes1.utils import logging
 
 
-# def compare_events(event1: Event, event2: Event) -> bool:
-#     return event1.time < event2.time
-
-
 class EventLoop:
     def __init__(self, verbose: bool, actor_system: ActorSystem) -> None:
-        # self.actors: List[Actor] = []
         self.verbose = verbose
         self.actor_system = actor_system
         self.event_queue: PriorityQueue[Event] = PriorityQueue()

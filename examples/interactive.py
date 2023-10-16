@@ -2,7 +2,6 @@
 interactive.py
 
 Provides an interactivve playground for experimenting with abdes1
-
 """
 import asyncio
 from prompt_toolkit.patch_stdout import patch_stdout  # type: ignore
@@ -11,32 +10,26 @@ from prompt_toolkit.patch_stdout import patch_stdout  # type: ignore
 # scripts findability
 
 from abdes1.core import ActorSystem, Event
-from abdes1.actors import Message, Process, ProcessArgs, Resource, ResourceArgs
+from abdes1.actors import Message, Actor, Resource, ResourceArgs
 from examples.console import user_input_loop
 
 
 async def main():
     with patch_stdout():
         print("creating actor system")
-        # event_loop = EventLoop()
         actor_system = ActorSystem()
 
         # Define a couple of actors
-        # resource = Resource("resource-1", event_loop, capacity=2)
-        # process = Process("process-1", event_loop)
-
-        args = ProcessArgs(id="process-1")
-        actor_system.register_actor(Process, **args)
-
+        actor_system.register_actor(Actor, id="actor-1")
+        # Example with args (could be more complex than this!)
         args = ResourceArgs(id="resource-1", capacity=2)
         actor_system.register_actor(Resource, **args)
-        # event_loop.actors.extend([resource, process])
 
         # Schedule an initial event
         start_message = Message(
             type="start-simulation",
             from_id="interactive.main",
-            to_id="process-1",
+            to_id="actor-1",
             content=None,
             time=0.0,
         )

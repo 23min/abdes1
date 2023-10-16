@@ -1,7 +1,6 @@
 from abdes1.actors import Actor
 from abdes1.actors import Message
 from abdes1.actors import Resource
-from abdes1.actors import Process
 from abdes1.core import Event
 from abdes1.core import EventLoop
 from abdes1.core import Registry
@@ -16,7 +15,6 @@ __all__ = [
     "Registry",
     "Message",
     "Resource",
-    "Process",
     "Event",
     "EventLoop",
     "logging",

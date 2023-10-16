@@ -1,13 +1,12 @@
 """
-    console.py
+console.py
 
-    Provides an interactive console with input separated from output.
+Provides an interactive console with input separated from output.
 
-    Input prompt is one line that is sticky to the bottom of the console window.
+Input prompt is one line that is sticky to the bottom of the console window.
 
-    Uses `prompt-toolkit`
-    Html formatting see https://python-prompt-toolkit.readthedocs.io/en/master/pages/printing_text.html
-
+Uses `prompt-toolkit`
+Html formatting see https://python-prompt-toolkit.readthedocs.io/en/master/pages/printing_text.html
 """
 from __future__ import annotations
 import asyncio

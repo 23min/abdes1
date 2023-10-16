@@ -1,9 +1,7 @@
 """
-
 registry.py
 
 Registers actors and provides a lookup service.
-
 """
 from __future__ import annotations
 from typing import List, Optional, TYPE_CHECKING

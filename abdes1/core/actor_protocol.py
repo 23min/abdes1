@@ -18,6 +18,3 @@ class ActorProtocol(Protocol):
 
     async def send_message(self, message: Message) -> None:
         ...
-
-    # def perform_action(self) -> None:
-    #     ...

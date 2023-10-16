@@ -1,5 +1,4 @@
 """
-
 actor_system.py
 
 The core of the actor system which handles
@@ -16,7 +15,6 @@ The event loop is tightly integrated with a model of computation.
 For example, in a discrete event simulation, time progresses as events occur.
 It should be possible to use different models of computation, but for this
 first iteration a DES compatible event loop will be used.
-
 """
 from __future__ import annotations
 from typing import Any, List, Optional, Type, TYPE_CHECKING

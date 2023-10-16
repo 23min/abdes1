@@ -6,6 +6,6 @@ from typing import Any
 class Message:
     type: str
     content: Any
-    from_id: str  # todo address
-    to_id: str  # todo address
+    from_id: str  # todo this should be an address
+    to_id: str  # todo this should be an address
     time: float  # Simulation time when the message should be processed

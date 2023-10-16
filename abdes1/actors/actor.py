@@ -14,7 +14,6 @@ class Actor:
         self.id = id
         self.mailbox: Queue[Message] = Queue()
         self.actor_system = actor_system
-        # self.event_loop = event_loop
         logging.log_event(self.id, f"Actor '{self.id}' created")
 
     async def run(self) -> None:
