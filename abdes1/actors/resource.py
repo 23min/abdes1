@@ -32,8 +32,8 @@ class Resource(Actor):
             await actor.send_message(
                 message=Message(
                     type="resource_available",
-                    fromId=self.id,
-                    toId=actor.id,
+                    from_id=self.id,
+                    to_id=actor.id,
                     content=None,
                     time=self.actor_system.event_loop.current_time,
                 ),

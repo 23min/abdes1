@@ -5,9 +5,9 @@ from .event_loop import EventLoop
 from .actor_system import ActorSystem
 
 __all__ = [
-    'ActorProtocol',
-    'Registry',
-    'Event',
-    'EventLoop',
-    'ActorSystem'
+    "ActorProtocol",
+    "Registry",
+    "Event",
+    "EventLoop",
+    "ActorSystem",
 ]

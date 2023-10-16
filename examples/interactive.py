@@ -35,12 +35,12 @@ async def main():
         # Schedule an initial event
         start_message = Message(
             type="start-simulation",
-            fromId="interactive.main",
-            toId="process-1",
+            from_id="interactive.main",
+            to_id="process-1",
             content=None,
             time=0.0,
         )
-        # start_event = Event(fromId="interactive.main", time=0.0, target_actor_id="process-1", message=start_message)
+        # start_event = Event(from_id="interactive.main", time=0.0, target_actor_id="process-1", message=start_message)
         start_event = Event(time=0.0, message=start_message)
         actor_system.schedule_event(start_event)
 
@@ -53,8 +53,8 @@ async def main():
                 time=0.0,
                 message=Message(
                     type="user-message",
-                    fromId="interactive.main",
-                    toId="resource-1",
+                    from_id="interactive.main",
+                    to_id="resource-1",
                     content="hello now",
                     time=0.0,
                 ),
@@ -65,8 +65,8 @@ async def main():
                 time=10.0,
                 message=Message(
                     type="user-message",
-                    fromId="interactive.main",
-                    toId="resource-1",
+                    from_id="interactive.main",
+                    to_id="resource-1",
                     content="hello 10s",
                     time=10.0,
                 ),

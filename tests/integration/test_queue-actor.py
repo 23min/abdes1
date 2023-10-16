@@ -48,8 +48,8 @@ async def test_queue_can_enqueue() -> None:
 
     m = Message(
         type="arrival",
-        fromId="pytest",
-        toId="q",
+        from_id="pytest",
+        to_id="q",
         content=None,
         time=0,
     )
@@ -59,8 +59,8 @@ async def test_queue_can_enqueue() -> None:
 
     m = Message(
         type="server-ready",
-        fromId="pytest",
-        toId="q",
+        from_id="pytest",
+        to_id="q",
         content=None,
         time=0,
     )
@@ -70,8 +70,8 @@ async def test_queue_can_enqueue() -> None:
 
     m = Message(
         type="state",
-        fromId="pytest",
-        toId="q",
+        from_id="pytest",
+        to_id="q",
         content=None,
         time=0,
     )
@@ -81,8 +81,8 @@ async def test_queue_can_enqueue() -> None:
 
     m = Message(
         type="invalid message type",
-        fromId="pytest",
-        toId="q",
+        from_id="pytest",
+        to_id="q",
         content=None,
         time=0,
     )

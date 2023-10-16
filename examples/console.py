@@ -92,8 +92,8 @@ async def user_input_loop(actor_system: ActorSystem) -> None:
         time = text_to_float(delay_s, lower_bound=0.0, upper_bound=10.0)
         message = Message(
             type="user-message",
-            fromId="console",
-            toId=target_actor,
+            from_id="console",
+            to_id=target_actor,
             content=user_message,
             time=time,
         )

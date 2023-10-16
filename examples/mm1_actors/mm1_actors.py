@@ -151,12 +151,12 @@ async def main(config_file: Optional[str]) -> None:
     # customer_generator.send_message(Message(type="configure", content=load_config(), time=0.0))
 
     # Schedule an initial event 'server-ready' so that the server can start processing
-    server_ready_message = Message(type="server-ready", fromId="mm1-actors", toId="queue", content=None, time=0.0)
+    server_ready_message = Message(type="server-ready", from_id="mm1-actors", to_id="queue", content=None, time=0.0)
     server_ready_event = Event(time=0.0, message=server_ready_message)
     actor_system.schedule_event(server_ready_event)
 
     # Schedule an initial event to start the simulation
-    start_message = Message(type="start", fromId="mm1-actors", toId="arrivals", content=None, time=0.0)
+    start_message = Message(type="start", from_id="mm1-actors", to_id="arrivals", content=None, time=0.0)
     start_event = Event(time=0.0, message=start_message)
     actor_system.schedule_event(start_event)
 

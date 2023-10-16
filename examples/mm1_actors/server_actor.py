@@ -36,7 +36,6 @@ class ServerActor(Actor):
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
-        self.actor_system = actor_system
         self.servce_rate = service_rate
         self.id = id
 
@@ -54,7 +53,7 @@ class ServerActor(Actor):
         if message.type == "customer":
             logging.log_event(
                 self.id,
-                f"Message received from '{message.fromId}': Customer '{message.content}' ready to be served!",
+                f"Message received from '{message.from_id}': Customer '{message.content}' ready to be served!",
             )
             # await self.process_message(message)
         else:
@@ -83,8 +82,8 @@ class ServerActor(Actor):
             time=service_time,
             message=Message(
                 type="server-ready",
-                fromId=self.id,
-                toId=message.fromId,  # TODO: Should the server be configured with the queue id?
+                from_id=self.id,
+                to_id=message.from_id,  # TODO: Should the server be configured with the queue id?
                 content=message.content,
                 time=service_time,
             ),

@@ -42,8 +42,8 @@ class EventLoop:
             # Advance simulation time
             # Advance only if the message is from actor 'queue' or actor 'server'
             # TODO: Should this be part of the configuration?
-            if (event.message.fromId == "queue") or (event.message.fromId == "server"):
-                if event.time > self.current_time:
+            if (event.message.from_id == "queue") or (event.message.from_id == "server"):
+                if event.time >= self.current_time:
                     self.current_time = event.time
                 else:
                     logging.log_event("-loop-", f"!!! Event time {event.time:>.2f} is in the past. Loop is catching up.")  # TODO: Is this a problem?
@@ -52,12 +52,12 @@ class EventLoop:
                 logging.log_event("-loop-", f"T: {self.current_time:>.2f}")
 
             # send message to actor
-            target_actor = self.actor_system.find_actor(event.message.toId)
+            target_actor = self.actor_system.find_actor(event.message.to_id)
             if target_actor is not None:
                 # Update the message time to the current simulation time, i.e. the message is sent "now"
                 # event.message.time = self.current_time
                 await target_actor.send_message(event.message)
             else:
-                logging.log_event("-loop-", f"Error: Actor '{event.message.toId}' not found")
+                logging.log_event("-loop-", f"Error: Actor '{event.message.to_id}' not found")
 
         # TODO Implement Shutdown

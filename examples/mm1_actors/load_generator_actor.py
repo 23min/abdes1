@@ -115,8 +115,8 @@ class LoadGeneratorActor(Actor):
                 # target_actor_id=target_actor or "",  # TODO Should be a 'deadletter' actor
                 message=Message(
                     type="customer",
-                    fromId=self.id,
-                    toId=self.destination,
+                    from_id=self.id,
+                    to_id=self.destination,
                     content=customer,
                     time=scheduled_time,
                 ),

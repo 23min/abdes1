@@ -21,7 +21,7 @@ class Actor:
         logging.log_event(self.id, f"Actor '{self.id}' running")
         while True:
             message = await self.mailbox.get()
-            logging.log_event(self.id, f"Handling mailbox message from '{message.fromId}': {message}. Mailbox size now [{self.mailbox.qsize()}].")
+            logging.log_event(self.id, f"Handling mailbox message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}].")
             # TODO: Does time have any business here?
             # if message.time > self.actor_system.event_loop.current_time:
             #     logging.log_event(self.id, f" ==> Message is in the future! {message.time} > {self.actor_system.event_loop.current_time}")
@@ -38,7 +38,7 @@ class Actor:
     async def send_message(self, message: Message) -> None:
         # TODO Handle when mailbox is full / backpressure
         self.mailbox.put_nowait(message)
-        logging.log_event(self.id, f"Adding mailbox Message from '{message.fromId}': {message}. Mailbox size now [{self.mailbox.qsize()}]. ")
+        logging.log_event(self.id, f"Adding mailbox Message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}]. ")
 
     async def process_message(self, message: Message) -> None:
         print(f"Actor {self.id} processing message: {message}")
