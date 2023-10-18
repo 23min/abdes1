@@ -67,7 +67,7 @@ class QueueActor(Actor):
     # --- Override Actor medhods
 
     # A message is sent to this actor
-    async def send_message(self, message: Message) -> None:
+    async def receive(self, message: Message) -> None:
         # TODO Validate message format
         # TODO Validate sender?
         # Validate message is for this actor
@@ -85,7 +85,7 @@ class QueueActor(Actor):
                 f"Invalid message type: {message.type}. Valid message types are: 'customer', 'server-ready'",
             )
 
-        await super().send_message(message)
+        await super().receive(message)
 
     # Arrival message: customer arrives -> enqueue
     # Server ready message: server ready ->

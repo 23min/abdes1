@@ -45,7 +45,7 @@ class ServerActor(Actor):
     # --- Override Actor medhods
 
     # A message is sent to this actor
-    async def send_message(self, message: Message) -> None:
+    async def receive(self, message: Message) -> None:
         # TODO Validate message format
         # TODO Validate sender?
         # Validate message is for this actor
@@ -61,7 +61,7 @@ class ServerActor(Actor):
                 f"Invalid message type: {message.type}. Valid message types are: 'arrival', 'server-ready'",
             )
 
-        await super().send_message(message)
+        await super().receive(message)
 
     # "customer" message: customer arrives
     # Server processes customer

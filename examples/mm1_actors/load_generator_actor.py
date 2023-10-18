@@ -81,12 +81,12 @@ class LoadGeneratorActor(Actor):
     # Stop ? or stop condition?
     # Maybe only duration (simulated time) is enough?
     # Or the number of events generated?
-    async def send_message(self, message: Message) -> None:
+    async def receive(self, message: Message) -> None:
         if message.type == "start":
             # print(f"[{self.id:10}] Start message received")
             logging.log_event(self.id, "Start message received")
             # await self.process_message(message, target_actor=message.toId)
-        await super().send_message(message)
+        await super().receive(message)
 
     # "customer" message: customer arrives
     # Server processes customer

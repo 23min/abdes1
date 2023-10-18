@@ -46,12 +46,12 @@ class StatsActor(Actor):
     # --- Override Actor medhods
 
     # A message is sent to this actor
-    async def send_message(self, message: Message) -> None:
+    async def receive(self, message: Message) -> None:
         # TODO Validate message type and format
         # TODO Validate sender?
         # Validate message is for this actor?
 
-        await super().send_message(message)
+        await super().receive(message)
 
     # "customer" message: customer arrives
     # Server processes customer

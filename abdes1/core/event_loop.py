@@ -51,7 +51,7 @@ class EventLoop:
             if target_actor is not None:
                 # Update the message time to the current simulation time, i.e. the message is sent "now"
                 # event.message.time = self.current_time
-                await target_actor.send_message(event.message)
+                await target_actor.receive(event.message)
             else:
                 logging.log_event("-loop-", f"Error: Actor '{event.message.to_id}' not found")
 

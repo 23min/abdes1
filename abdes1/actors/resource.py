@@ -29,7 +29,7 @@ class Resource(Actor):
     async def release(self) -> None:
         if self.queue:
             actor = await self.queue.get()  # TODO Actors in the queue or actor Ids?
-            await actor.send_message(
+            await actor.receive(  # TODO: Need to use the schedule_message api instead
                 message=Message(
                     type="resource_available",
                     from_id=self.id,

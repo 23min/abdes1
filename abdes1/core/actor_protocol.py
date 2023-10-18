@@ -16,5 +16,5 @@ class ActorProtocol(Protocol):
     async def run(self) -> None:
         ...
 
-    async def send_message(self, message: Message) -> None:
+    async def receive(self, message: Message) -> None:
         ...

@@ -6,7 +6,7 @@ from typing import Any
 class Message:
     type: str
     content: Any
-    from_id: str  # todo this should be an address
-    to_id: str  # todo this should be an address
-    time: float  # Simulation time when the message should be processed
-    # TODO: Perhaps have "scheduled_time" and "processed_time" fields
+    from_id: str  # TODO this should be an address
+    to_id: str  # TODO this should be an address
+    time: float  # TODO Should we have sent_time and received_time?
+    # TODO: Also, for DES, we need "scheduled_time" for the future event list
