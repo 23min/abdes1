@@ -211,7 +211,17 @@ strict_equality = true
 # Pylance
 [tool.pyright]
 include = ["abdes1", "examples"]
-exclude = []
+exclude = [
+    "docs",
+    "tests",
+    ".pytest_tmp",
+    ".venv",
+    ".env",
+    "build",
+    "dist",
+    "examples/.venv",
+    "examples/.env",
+]
 strict = ["abdes1"]
 typeCheckingMode = "strict"
 reportMissingImports = "information"

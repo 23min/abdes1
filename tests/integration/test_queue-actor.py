@@ -52,6 +52,7 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
+        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
@@ -63,6 +64,7 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
+        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
@@ -74,6 +76,7 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
+        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
@@ -85,6 +88,7 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
+        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)

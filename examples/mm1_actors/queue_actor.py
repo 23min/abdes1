@@ -59,7 +59,7 @@ class QueueActor(Actor):
         self.type = type
         self.queue: Queue[Tuple[float, str]] = Queue()
         self.id = id
-        self.server_ready = False  # keep track of server state. Used in order to keep queue_actor reentrant.
+        self.server_ready: bool = False  # keep track of server state. Used in order to keep queue_actor reentrant.
 
     async def run(self) -> None:
         await super().run()
@@ -92,83 +92,104 @@ class QueueActor(Actor):
     #   dequeue + send message to server "serve customer"
     #
     # 1. Message "customer" received from generator.
-    #    If server is ready, send message directly  to server.
-    #    If server is not ready, enqueue message.
+    #    If it is the first customer ('start'), send directly to server
+    #    If there is a queue, enqueue message
+    #    Else, if server is ready and queue is empty, send message direcetly to server
     # 2. Message "server-ready" received from server.
     #    If queue is not empty, dequeue message and send to server.
     #    If queue is empty, set server state to ready (server_ready = True)
     async def process_message(self, message: Message) -> None:
         logging.log_event(self.id, f"Processing message: {message}")
 
+        assert message.scheduled_time is not None
+        # arrival time is either the scheduled time or the time the message was sent
+        self.arrival_time = message.scheduled_time
+
+        # First customer, send directly to server
         if message.type == "customer" and message.content != "c_0":  # and not self.server_ready:
-            self._enqueue(message.time, message.content)
-            logging.log_event(self.id, f"Queueing customer '{message.content}'. Queue size: {self.queue.qsize()}")
+            self._enqueue(self.arrival_time, message.content)
+            logging.log_event(self.id, f"Queueing customer '{message.content}'. Arrival time {self.arrival_time} Queue size: {self.queue.qsize()}")
 
             # Send metric to stats actor
-            self.actor_system.schedule_event_from_now(
-                Event(
-                    time=0.0,
-                    message=Message(
-                        type="customer-queued",
-                        from_id=self.id,
-                        to_id="stats",
-                        content=None,
-                        time=message.time,
-                    ),
-                ),
+            self.actor_system.dispatch_message(
+                message=Message(type="customer-queued", from_id=self.id, to_id="stats", content=None, time=message.time, scheduled_time=None),
             )
 
             return
 
-        message_to_send = None
-        if message.type == "customer":  # or message.content == "c_0":  # and self.server_ready:
-            if self.queue.empty():
-                logging.log_event(self.id, f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
-                # reset server_ready state
-                self.server_ready = False
-                message_to_send = Message(
-                    type="customer",
-                    from_id=self.id,
-                    to_id=self.server,
-                    content=message.content,
-                    time=message.time,
-                )
+        # Second or later customer:
+        #   if the queue is empty:
+        #       If the server is ready: send directly to server. The shedule time is the arrival-time.
+        #       Else, enqueue message.
+        #   Queue is not empty, enqueue message
+
+        # If server is ready, send message directly to server
+        # If server is not ready, enqueue message
+
+        if message.type == "customer":
+            # If server is ready, send directly to server
+            #   customer was not queued, so time == arrival_time == scheduled_time
+            # Else, enqueue
+
+            if self.server_ready:
+                if self.queue.empty():
+                    logging.log_event(self.id, f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
+                    message_to_send = Message(
+                        type="customer",
+                        from_id=self.id,
+                        to_id=self.server,
+                        content=message.content,
+                        scheduled_time=self.arrival_time,
+                    )
+                    self.actor_system.schedule_event(Event(0.0, message=message_to_send))
+                else:
+                    # Dequeue customer and send to server
+                    # Enqueue incoming message
+                    # scheduled_time = time 'server-ready' was received = msessage.secheduled_time
+
+                    logging.log_event(self.id, f"Queue is not empty. Dequeueing customer '{message.content}' and sending to '{self.server}'. Queueing customer '{message.content}'")
+
+                    self._enqueue(self.arrival_time, message.content)
+                    result = await self._dequeue()
+                    if result is None:
+                        raise Exception("Invalid result from dequeue")
+
+                    (_, customer) = result
+                    message_to_send = Message(
+                        type="customer",
+                        from_id=self.id,
+                        to_id=self.server,
+                        content=customer,
+                        scheduled_time=message.scheduled_time,
+                    )
+                    self.actor_system.schedule_event(Event(0.0, message=message_to_send))
             else:
-                logging.log_event(self.id, f"Queue is not empty. Dequeueing customer '{message.content}' and sending to '{self.server}'. Queueing customer '{message.content}'")
-                self._enqueue(message.time, message.content)
-                result = await self._dequeue()
-                if result is None:
-                    raise Exception("Invalid result from dequeue")
-                (arrival_time, customer) = result
-                message_to_send = Message(
-                    type="customer",
-                    from_id=self.id,
-                    to_id=self.server,
-                    content=customer,
-                    time=arrival_time,
-                )
+                self._enqueue(self.arrival_time, message.content)
+            self.server_ready = False
 
-        if message.type == "server-ready":  # or message.content == "c_0":
-            result = await self._dequeue()
-            if result is None:
+        if message.type == "server-ready":
+            # The time is now the scheduled_time, i.e. the time the message was sent from the server
+            # This is equal to the dequeue time plus the service time
+            # This is equal to the previous "server_ready" time plus the service time
+            # The server sent this as a schedule_event, so the time is the scheduled_time
+
+            if (result := await self._dequeue()) is not None:
+                _, customer = result
+            else:
                 # No customers in queue, but server state is ready.
-                # As soon as a customer arrives, the customer will be sent to the sever
+                # As soon as a customer arrives, the customer will be sent to the server
                 return
-            (arrival_time, customer) = result
 
-            logging.log_event(self.id, f"Sending first customer in the queue ({customer}) to '{self.server}'")
+            # TODO: We can calculate the wait time here!
+
+            logging.log_event(self.id, f"Sending in the front of the queue ({customer}) to '{self.server}'")
             message_to_send = Message(
                 type="customer",
                 from_id=self.id,
                 to_id=self.server,
                 content=customer,
-                time=arrival_time,
+                scheduled_time=message.scheduled_time,
             )
-
-        if message_to_send is not None:
-            self.actor_system.schedule_event_from_now(Event(0.0, message=message_to_send))
-        else:
-            raise Exception("Invalid message type.")
 
     # --- Internal stuff
 

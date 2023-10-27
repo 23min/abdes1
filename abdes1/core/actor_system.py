@@ -22,15 +22,15 @@ import asyncio
 
 if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
-from abdes1.core import Registry
-from abdes1.core import Event, EventLoop
+    from abdes1.actors import Message
+from abdes1.core import Event, EventLoop, Registry
 from abdes1.utils import logging
 
 
 class ActorSystem:
     def __init__(self) -> None:
         self.registry = Registry()
-        self._event_loop = EventLoop(True, self)  # TODO: Paramatrize verbosity
+        self._event_loop = EventLoop(True, self)
         logging.log_event("-system-", "Actor system created")
 
     async def run(self) -> None:
@@ -70,8 +70,8 @@ class ActorSystem:
     def schedule_event(self, event: Event) -> None:
         self._event_loop.schedule_event(event)
 
-    def schedule_event_from_now(self, event: Event) -> None:
-        self._event_loop.schedule_event_from_now(event)
+    def dispatch_message(self, message: Message) -> None:
+        self._event_loop.dispatch_message(message)
 
     @property
     def event_loop(self) -> EventLoop:

@@ -119,6 +119,7 @@ class LoadGeneratorActor(Actor):
                     to_id=self.destination,
                     content=customer,
                     time=scheduled_time,
+                    scheduled_time=scheduled_time,
                 ),
             )
             # print(f"[{self.id:10}] Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}")

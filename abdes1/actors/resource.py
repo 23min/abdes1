@@ -35,7 +35,8 @@ class Resource(Actor):
                     from_id=self.id,
                     to_id=actor.id,
                     content=None,
-                    time=self.actor_system.event_loop.current_time,
+                    time=0.0,
+                    scheduled_time=0.0,
                 ),
             )
         else:

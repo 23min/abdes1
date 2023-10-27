@@ -95,6 +95,7 @@ async def user_input_loop(actor_system: ActorSystem) -> None:
             to_id=target_actor,
             content=user_message,
             time=time,
+            scheduled_time=time,
         )
         event = Event(
             time=time,

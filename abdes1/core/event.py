@@ -10,7 +10,3 @@ if TYPE_CHECKING:
 class Event:
     time: float
     message: Message
-
-    def __lt__(self: Event, other: Event):
-        # Note that we've reversed the operands here, since we want a max-heap.
-        return other.time < self.time

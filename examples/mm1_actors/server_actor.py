@@ -65,7 +65,7 @@ class ServerActor(Actor):
 
     # "customer" message: customer arrives
     # Server processes customer
-    # When done, server sends message to queue "server-ready"
+    # When done, server schedules an event with a message "server-ready" to actor 'queue'
     async def process_message(self, message: Message) -> None:
         # Calculate random service time from service rate
         service_time = random.expovariate(self.servce_rate)
@@ -75,20 +75,25 @@ class ServerActor(Actor):
             f"Customer {message.content} service time: {service_time:.2f}",
         )
 
+        if message.time is None:
+            raise ValueError("Message time should have been set.")
+        future_event_time = message.time + service_time
+
         # Schedule departure event
         # The customer doesn't actually depart, he/she evaporates
         # We just send a message to the queue that the server is ready
+        # (Actually, this is a future event because all this happens instantly in the server)
         event = Event(
-            time=service_time,
+            time=future_event_time,
             message=Message(
                 type="server-ready",
                 from_id=self.id,
                 to_id=message.from_id,  # TODO: Should the server be configured with the queue id?
                 content=message.content,
-                time=service_time,
+                scheduled_time=future_event_time,
             ),
         )
 
-        self.actor_system.schedule_event_from_now(event)
+        self.actor_system.schedule_event(event)
 
     # --- Internal stuff

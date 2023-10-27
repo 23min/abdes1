@@ -164,12 +164,12 @@ async def main(config_file: Optional[str]) -> None:
     actor_system.register_actor(StatsActor, **asdict(stats_config))
 
     # Schedule an initial event 'server-ready' so that the server can start processing
-    server_ready_message = Message(type="server-ready", from_id="mm1-actors", to_id="queue", content=None, time=0.0)
+    server_ready_message = Message(type="server-ready", from_id="mm1-actors", to_id="queue", content=None, time=0.0, scheduled_time=0.0)
     server_ready_event = Event(time=0.0, message=server_ready_message)
     actor_system.schedule_event(server_ready_event)
 
     # Schedule an initial event to start the simulation
-    start_message = Message(type="start", from_id="mm1-actors", to_id="arrivals", content=None, time=0.0)
+    start_message = Message(type="start", from_id="mm1-actors", to_id="arrivals", content=None, time=0.0, scheduled_time=0.0)
     start_event = Event(time=0.0, message=start_message)
     actor_system.schedule_event(start_event)
 
