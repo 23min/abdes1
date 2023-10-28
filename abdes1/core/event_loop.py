@@ -38,14 +38,17 @@ class EventLoop:
                 logging.log_event("-loop-", f"Processing message {message} with scheduled time {message.scheduled_time:>.2f}")
 
             assert message.scheduled_time is not None, "message.scheduled_time is None"
+
             # Advance simulation time
+            self.current_time = message.scheduled_time
+
             # Advance only if the message is from actor 'queue' or actor 'server'
             # TODO: Should this be part of the configuration?
-            if (message.from_id == "queue") or (message.from_id == "server"):
-                if message.scheduled_time >= self.current_time:
-                    self.current_time = message.scheduled_time
-                else:
-                    logging.log_event("-loop-", f"!!! Message scheduled_time {message.scheduled_time:>.2f} is in the past. Loop is catching up.")  # TODO: Is this a problem?
+            # if (message.from_id == "queue") or (message.from_id == "server" or message.from_id == "arrivals"):
+            #     if message.scheduled_time >= self.current_time:
+            #         self.current_time = message.scheduled_time
+            #     else:
+            #         logging.log_event("-loop-", f"!!! Message scheduled_time {message.scheduled_time:>.2f} is in the past. Loop is catching up.")  # TODO: Is this a problem?
 
             if self.verbose:
                 logging.log_event("-loop-", f"T: {self.current_time:>.2f}")

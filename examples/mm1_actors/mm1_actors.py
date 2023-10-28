@@ -121,7 +121,7 @@ async def main(config_file: Optional[str]) -> None:
         load_generator_config = LoadGeneratorConfig(
             id="arrivals",
             event_rate=0.5,
-            duration=100.0,
+            duration=10.0,
             destination="queue",
         )
         stats_config = StatsConfig(
