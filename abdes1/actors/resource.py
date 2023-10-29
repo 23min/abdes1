@@ -30,14 +30,7 @@ class Resource(Actor):
         if self.queue:
             actor = await self.queue.get()  # TODO Actors in the queue or actor Ids?
             await actor.receive(  # TODO: Need to use the schedule_message api instead
-                message=Message(
-                    type="resource_available",
-                    from_id=self.id,
-                    to_id=actor.id,
-                    content=None,
-                    time=0.0,
-                    scheduled_time=0.0,
-                ),
+                message=Message(type="resource_available", from_id=self.id, to_id=actor.id, content=None, time=0.0),
             )
         else:
             self.capacity += 1

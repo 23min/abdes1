@@ -24,14 +24,15 @@ if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
     from abdes1.actors import Message
 from abdes1.core import Event, EventLoop, Registry
-from abdes1.utils import logging
+from abdes1.utils import Logger
 
 
 class ActorSystem:
     def __init__(self) -> None:
         self.registry = Registry()
         self._event_loop = EventLoop(True, self)
-        logging.log_event("-system-", "Actor system created")
+        self.logger = Logger("-system-")
+        self.logger.info("Actor System created")
 
     async def run(self) -> None:
         # TODO: Refactor to Actor System and place the tasks below under supervision
@@ -42,11 +43,11 @@ class ActorSystem:
         # Schedule the future event loop
         event_loop_task = asyncio.create_task(self._event_loop.run())
 
-        logging.log_event("-system-", "Actor system running")
+        self.logger.info("Actor System running")
         # await self._event_loop.run()
         await event_loop_task
 
-        logging.log_event("-system-", "Actor system stopped")
+        self.logger.info("Actor System stopped")
 
     # --- Registry
 
@@ -54,7 +55,7 @@ class ActorSystem:
         kwargs.update({"actor_system": self})
         actor = actor_class(*args, **kwargs)
         self.registry.actors.append(actor)
-        logging.log_event("-system-", f"Actor '{actor.id}' registered")
+        self.logger.info(f"Actor '{actor.id}' registered")
 
     def actor(self, actor_id: str) -> Optional[ActorProtocol]:
         return self.registry.find_actor(actor_id)

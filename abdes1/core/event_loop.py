@@ -4,43 +4,49 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from abdes1.actors import Message
-    from abdes1.core import ActorSystem, Event
+    from abdes1.core import ActorSystem
 
-from abdes1.utils import logging
+from abdes1.core import Event
+
+from abdes1.core.message_logger import MessageLogger
+from abdes1.utils.logger import Logger
 
 
 class EventLoop:
     def __init__(self, verbose: bool, actor_system: ActorSystem) -> None:
         self.verbose = verbose
         self.actor_system = actor_system
-        self.future_event_queue: PriorityQueue[Message] = PriorityQueue()
+        self.future_event_queue: PriorityQueue[Event] = PriorityQueue()
         self.current_time: float = 0.0
-        logging.log_event("-loop-", "Event loop created")
+        self.logger = Logger("-loop-")
+        self.logger.info("Event loop created")
+        self.message_logger = MessageLogger("-loop-")
 
     def schedule_event(self, event: Event) -> None:
-        logging.log_event("-loop-", f"Scheduling event {event} with scheduled time {event.time:>.2f}")
-        event.message.scheduled_time = event.time
-        self.future_event_queue.put_nowait(event.message)
+        self.logger.debug(f"Scheduling event {event} with scheduled time {event.time:>.2f}")
+        self.future_event_queue.put_nowait(event)
 
     def dispatch_message(self, message: Message) -> None:
-        logging.log_event("-loop-", f"Dispatching message {message} as soon as possible (current time: {self.current_time}))")
+        self.logger.debug(f"Dispatching message {message} as soon as possible (current time: {self.current_time}))")
         # event = Event(self.current_time, message)
-        message.scheduled_time = self.current_time  # pylint: disable=used-before-assignment
-        self.future_event_queue.put_nowait(message)
+        # message.scheduled_time = self.current_time  # pylint: disable=used-before-assignment
+        e = Event(time=None, message=message)
+        self.future_event_queue.put_nowait(e)
 
     async def run(self) -> None:
-        logging.log_event("-loop-", "Event loop running")
+        self.logger.info("Event loop running")
 
         while True:
-            message = await self.future_event_queue.get()
+            event = await self.future_event_queue.get()
 
             if self.verbose:
-                logging.log_event("-loop-", f"Processing message {message} with scheduled time {message.scheduled_time:>.2f}")
+                self.logger.debug(f"Processing message {event.message} with scheduled time {event.time:>.2f}")
 
-            assert message.scheduled_time is not None, "message.scheduled_time is None"
+            assert event.time is not None, "message.scheduled_time is None"
 
             # Advance simulation time
-            self.current_time = message.scheduled_time
+            if (event.message.to_id != "stats") and (event.message.to_id != "arrivals"):
+                self.current_time = event.time
 
             # Advance only if the message is from actor 'queue' or actor 'server'
             # TODO: Should this be part of the configuration?
@@ -51,16 +57,18 @@ class EventLoop:
             #         logging.log_event("-loop-", f"!!! Message scheduled_time {message.scheduled_time:>.2f} is in the past. Loop is catching up.")  # TODO: Is this a problem?
 
             if self.verbose:
-                logging.log_event("-loop-", f"T: {self.current_time:>.2f}")
+                self.logger.debug(f"T: {self.current_time:>.2f}")
 
             # send message to actor
+            message = event.message
             target_actor = self.actor_system.find_actor(message.to_id)
             if target_actor is not None:
                 # Update the message time to the current simulation time, i.e. the message is sent "now"
                 # event.message.time = self.current_time
                 message.time = self.current_time
+                self.message_logger.log_message(event_source="-loop-", message=message)
                 await target_actor.receive(message)
             else:
-                logging.log_event("-loop-", f"Error: Actor '{message.to_id}' not found")
+                self.logger.warning(f"Error: Actor '{message.to_id}' not found")
 
         # TODO Implement Shutdown

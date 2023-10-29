@@ -49,6 +49,7 @@ dev = [
     "prompt_toolkit",
     "matplotlib",
     "ipykernel",
+    "python-dotenv",
 ]
 ci = []
 docs = []

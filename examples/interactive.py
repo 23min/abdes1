@@ -32,7 +32,6 @@ async def main():
             to_id="actor-1",
             content=None,
             time=0.0,
-            scheduled_time=0.0,
         )
         # start_event = Event(from_id="interactive.main", time=0.0, target_actor_id="process-1", message=start_message)
         start_event = Event(time=0.0, message=start_message)
@@ -51,7 +50,6 @@ async def main():
                     to_id="resource-1",
                     content="hello now",
                     time=0.0,
-                    scheduled_time=0.0,
                 ),
             ),
         )
@@ -64,7 +62,6 @@ async def main():
                     to_id="resource-1",
                     content="hello 10s",
                     time=0.0,
-                    scheduled_time=10.0,
                 ),
             ),
         )

@@ -15,8 +15,9 @@ from typing import TypedDict
 from math import log
 
 from abdes1.core import ActorSystem, Event
-from abdes1.actors import Actor, Message
-from abdes1.utils import logging
+from abdes1.actors import Message
+from abdes1.des import DE_Actor
+from abdes1.utils.logger import Logger
 
 
 def next_exponential(rate: float) -> float:
@@ -28,7 +29,7 @@ class ServerActorArgs(TypedDict):
     service_rate: float
 
 
-class ServerActor(Actor):
+class ServerActor(DE_Actor):
     def __init__(
         self,
         id: str,
@@ -38,6 +39,8 @@ class ServerActor(Actor):
         super().__init__(id, actor_system)
         self.servce_rate = service_rate
         self.id = id
+        self.logger = Logger(id)
+        self.logger.info("Server actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -51,8 +54,7 @@ class ServerActor(Actor):
         # Validate message is for this actor
 
         if message.type == "customer":
-            logging.log_event(
-                self.id,
+            self.logger.debug(
                 f"Message received from '{message.from_id}': Customer '{message.content}' ready to be served!",
             )
             # await self.process_message(message)
@@ -70,8 +72,7 @@ class ServerActor(Actor):
         # Calculate random service time from service rate
         service_time = random.expovariate(self.servce_rate)
 
-        logging.log_event(
-            self.id,
+        self.logger.debug(
             f"Customer {message.content} service time: {service_time:.2f}",
         )
 
@@ -85,15 +86,11 @@ class ServerActor(Actor):
         # (Actually, this is a future event because all this happens instantly in the server)
         event = Event(
             time=future_event_time,
-            message=Message(
-                type="server-ready",
-                from_id=self.id,
-                to_id=message.from_id,  # TODO: Should the server be configured with the queue id?
-                content=message.content,
-                scheduled_time=future_event_time,
-            ),
+            message=Message(type="server-ready", from_id=self.id, to_id=message.from_id, content=message.content),  # TODO: Should the server be configured with the queue id?
         )
 
         self.actor_system.schedule_event(event)
+        message.processed = True
+
 
     # --- Internal stuff

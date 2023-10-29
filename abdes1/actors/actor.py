@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .message import Message
 from abdes1.core import ActorSystem
-from abdes1.utils import logging
+from abdes1.utils.logger import Logger
 
 
 class Actor:
@@ -14,13 +14,14 @@ class Actor:
         self.id = id
         self.mailbox: Queue[Message] = Queue()
         self.actor_system = actor_system
-        logging.log_event(self.id, f"Actor '{self.id}' created")
+        self.logger = Logger(f"{self.id}")
+        self.logger.info(f"Actor '{self.id}' created")
 
     async def run(self) -> None:
-        logging.log_event(self.id, f"Actor '{self.id}' running")
+        self.logger.info(f"Actor '{self.id}' running")
         while True:
             message = await self.mailbox.get()
-            logging.log_event(self.id, f"Handling mailbox message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}].")
+            self.logger.debug(f"Handling mailbox message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}].")
             # TODO: Does time have any business here?
             # if message.time > self.actor_system.event_loop.current_time:
             #     logging.log_event(self.id, f" ==> Message is in the future! {message.time} > {self.actor_system.event_loop.current_time}")
@@ -56,7 +57,7 @@ class Actor:
         """
         # TODO Handle when mailbox is full / backpressure
         self.mailbox.put_nowait(message)
-        logging.log_event(self.id, f"Adding mailbox Message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}]. ")
+        self.logger.debug(f"Adding mailbox Message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}]. ")
 
     async def process_message(self, message: Message) -> None:
         """

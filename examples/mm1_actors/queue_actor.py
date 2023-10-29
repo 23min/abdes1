@@ -23,8 +23,9 @@ from enum import Enum
 
 # from typing import Any, Coroutine
 from abdes1.core import ActorSystem, Event
-from abdes1.actors import Actor, Message
-from abdes1.utils import logging
+from abdes1.actors import Message
+from abdes1.utils.logger import Logger
+from abdes1.des import DE_Actor
 
 
 # Having fun with queue types. For now we only use FIFO in m/m/1
@@ -46,7 +47,7 @@ class QueueActorArgs(TypedDict):
     server: str
 
 
-class QueueActor(Actor):
+class QueueActor(DE_Actor):
     def __init__(
         self,
         id: str,
@@ -60,6 +61,8 @@ class QueueActor(Actor):
         self.queue: Queue[Tuple[float, str]] = Queue()
         self.id = id
         self.server_ready: bool = False  # keep track of server state. Used in order to keep queue_actor reentrant.
+        self.logger = Logger(id)
+        self.logger.info("Queue actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -73,10 +76,10 @@ class QueueActor(Actor):
         # Validate message is for this actor
 
         if message.type == "customer":
-            logging.log_event(self.id, f"Message received from '{message.from_id}': Customer {message.content} arrived!")
+            self.logger.debug(f"Message received from '{message.from_id}': Customer {message.content} arrived!")
         elif message.type == "server-ready":
             self.server_ready = True
-            logging.log_event(self.id, f"Message received from '{message.from_id}': Server ready!")
+            self.logger.debug(f"Message received from '{message.from_id}': Server ready!")
         elif message.type == "get-state":
             state = f"Queue depth: {self._get_depth()}"
             print(state)  # TODO: Should really send a message back to the sender
@@ -99,97 +102,91 @@ class QueueActor(Actor):
     #    If queue is not empty, dequeue message and send to server.
     #    If queue is empty, set server state to ready (server_ready = True)
     async def process_message(self, message: Message) -> None:
-        logging.log_event(self.id, f"Processing message: {message}")
+        try:
+            self.logger.debug(f"Processing message: {message}")
 
-        assert message.scheduled_time is not None
-        # arrival time is either the scheduled time or the time the message was sent
-        self.arrival_time = message.scheduled_time
+            assert message.time is not None
+            # arrival time is either the scheduled time or the time the message was sent
+            arrival_time = message.time
 
-        # First customer, send directly to server
-        if message.type == "customer" and message.content != "c_0":  # and not self.server_ready:
-            self._enqueue(self.arrival_time, message.content)
-            logging.log_event(self.id, f"Queueing customer '{message.content}'. Arrival time {self.arrival_time} Queue size: {self.queue.qsize()}")
+            # First customer, send directly to server
+            # if message.type == "customer" and message.content != "c_0":  # and not self.server_ready:
+            #     self._enqueue(arrival_time, message.content)
+            #     self.logger.debug(f"Queueing customer '{message.content}'. Arrival time {arrival_time} Queue size: {self.queue.qsize()}")
 
-            # Send metric to stats actor
-            self.actor_system.dispatch_message(
-                message=Message(type="customer-queued", from_id=self.id, to_id="stats", content=None, time=message.time, scheduled_time=None),
-            )
 
-            return
+            #     return
 
-        # Second or later customer:
-        #   if the queue is empty:
-        #       If the server is ready: send directly to server. The shedule time is the arrival-time.
-        #       Else, enqueue message.
-        #   Queue is not empty, enqueue message
+            # Second or later customer:
+            #   if the queue is empty:
+            #       If the server is ready: send directly to server. The shedule time is the arrival-time.
+            #       Else, enqueue message.
+            #   Queue is not empty, enqueue message
 
-        # If server is ready, send message directly to server
-        # If server is not ready, enqueue message
+            # If server is ready, send message directly to server
+            # If server is not ready, enqueue message
 
-        if message.type == "customer":
-            # If server is ready, send directly to server
-            #   customer was not queued, so time == arrival_time == scheduled_time
-            # Else, enqueue
+            if message.type == "customer":
 
-            if self.server_ready:
-                if self.queue.empty():
-                    logging.log_event(self.id, f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
-                    message_to_send = Message(
-                        type="customer",
-                        from_id=self.id,
-                        to_id=self.server,
-                        content=message.content,
-                        scheduled_time=self.arrival_time,
-                    )
-                    self.actor_system.schedule_event(Event(0.0, message=message_to_send))
+                # If server is ready, send directly to server
+                #   customer was not queued, so time == arrival_time == scheduled_time
+                # Else, enqueue
+
+                if self.server_ready:
+                    if self.queue.empty():
+                        self.logger.debug(f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
+                        message_to_send = Message(type="customer", from_id=self.id, to_id=self.server, content=message.content)
+                        self.actor_system.schedule_event(Event(time=arrival_time, message=message_to_send))
+                    else:
+                        # Dequeue customer and send to server
+                        # Enqueue incoming message
+                        # scheduled_time = time 'server-ready' was received = msessage.secheduled_time
+
+                        self.logger.debug(f"Queue is not empty. Dequeueing customer '{message.content}' and sending to '{self.server}'. Queueing customer '{message.content}'")
+
+                        self._enqueue(arrival_time, message.content)
+                        result = await self._dequeue()
+                        if result is None:
+                            raise Exception("Invalid result from dequeue")
+
+                        (_, customer) = result
+                        message_to_send = Message(
+                            type="customer",
+                            from_id=self.id,
+                            to_id=self.server,
+                            content=customer,
+                        )
+                        self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
                 else:
-                    # Dequeue customer and send to server
-                    # Enqueue incoming message
-                    # scheduled_time = time 'server-ready' was received = msessage.secheduled_time
+                    self._enqueue(arrival_time, message.content)
+                self.server_ready = False
 
-                    logging.log_event(self.id, f"Queue is not empty. Dequeueing customer '{message.content}' and sending to '{self.server}'. Queueing customer '{message.content}'")
+            if message.type == "server-ready":
+                # The time is now the message.time, i.e. the time the message was sent from the server
+                # This is equal to the dequeue time plus the service time
+                # This is equal to the previous "server_ready" time plus the service time
 
-                    self._enqueue(self.arrival_time, message.content)
-                    result = await self._dequeue()
-                    if result is None:
-                        raise Exception("Invalid result from dequeue")
+                if (result := await self._dequeue()) is not None:
+                    _, customer = result
+                else:
+                    # No customers in queue, but server state is ready.
+                    # As soon as a customer arrives, the customer will be sent to the server
+                    return
 
-                    (_, customer) = result
-                    message_to_send = Message(
-                        type="customer",
-                        from_id=self.id,
-                        to_id=self.server,
-                        content=customer,
-                        scheduled_time=message.scheduled_time,
-                    )
-                    self.actor_system.schedule_event(Event(0.0, message=message_to_send))
-            else:
-                self._enqueue(self.arrival_time, message.content)
-            self.server_ready = False
+                # TODO: We can calculate the wait time here!
 
-        if message.type == "server-ready":
-            # The time is now the scheduled_time, i.e. the time the message was sent from the server
-            # This is equal to the dequeue time plus the service time
-            # This is equal to the previous "server_ready" time plus the service time
-            # The server sent this as a schedule_event, so the time is the scheduled_time
+                self.logger.debug(f"Sending customer ({customer}) at the head of the queue to '{self.server}'")
+                message_to_send = Message(type="customer", from_id=self.id, to_id=self.server, content=customer)
 
-            if (result := await self._dequeue()) is not None:
-                _, customer = result
-            else:
-                # No customers in queue, but server state is ready.
-                # As soon as a customer arrives, the customer will be sent to the server
-                return
+                self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
 
-            # TODO: We can calculate the wait time here!
+        finally:
+            message.processed = True
 
-            logging.log_event(self.id, f"Sending in the front of the queue ({customer}) to '{self.server}'")
-            message_to_send = Message(
-                type="customer",
-                from_id=self.id,
-                to_id=self.server,
-                content=customer,
-                scheduled_time=message.scheduled_time,
-            )
+        # # Send metric to stats actor
+        self.actor_system.dispatch_message(
+            message=Message(type="queue-depth", from_id=self.id, to_id="stats", content=self.queue.qsize(), time=message.time),
+        )
 
     # --- Internal stuff
 
@@ -202,7 +199,7 @@ class QueueActor(Actor):
             # 0.01 is a hack to avoid the queue.get() to block forever
             async with asyncio.timeout_at(asyncio.get_running_loop().time() + 0.01):
                 (arrival_time, customer) = await self.queue.get()
-                logging.log_event(self.id, f"Got '{customer}' with arrival time {arrival_time:.2f} off the queue. Queue size: {self.queue.qsize()}")
+                self.logger.debug(f"Got '{customer}' with arrival time {arrival_time:.2f} off the queue. Queue size: {self.queue.qsize()}")
                 return (arrival_time, customer)
             # return await asyncio.wait_for(self.queue.get(), timeout=1)
             # print(f"[{self.id}] Message received from {message.fromId}: Serving customer {customer}...")

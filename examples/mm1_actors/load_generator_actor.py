@@ -26,8 +26,9 @@ from math import log
 
 # from typing import Any, Coroutine
 from abdes1.core import ActorSystem, Event
-from abdes1.actors import Actor, Message
-from abdes1.utils import logging
+from abdes1.actors import Message
+from abdes1.des import DE_Actor
+from abdes1.utils.logger import Logger
 
 
 def next_exponential(rate: float) -> float:
@@ -49,7 +50,7 @@ class LoadGeneratorActorArgs(TypedDict):
     destination: str
 
 
-class LoadGeneratorActor(Actor):
+class LoadGeneratorActor(DE_Actor):
     def __init__(
         self,
         id: str,
@@ -63,6 +64,8 @@ class LoadGeneratorActor(Actor):
         self.duration = duration
         self.destination = destination
         self.id = id
+        self.logger = Logger(id)
+        self.logger.info("Load Generator actor created")
         # TODO: Make sure the values are valid
         # event_rate should be > 0
         # duration should be > 0
@@ -84,7 +87,7 @@ class LoadGeneratorActor(Actor):
     async def receive(self, message: Message) -> None:
         if message.type == "start":
             # print(f"[{self.id:10}] Start message received")
-            logging.log_event(self.id, "Start message received")
+            self.logger.debug("Start message received")
             # await self.process_message(message, target_actor=message.toId)
         await super().receive(message)
 
@@ -118,16 +121,16 @@ class LoadGeneratorActor(Actor):
                     from_id=self.id,
                     to_id=self.destination,
                     content=customer,
-                    time=scheduled_time,
-                    scheduled_time=scheduled_time,
+                    time=None,
                 ),
             )
             # print(f"[{self.id:10}] Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}")
-            logging.log_event(
-                self.id,
+            self.logger.debug(
                 f"Generated arrival of '{customer}' after {next_arrival_time:.2f} at simulation time: {scheduled_time:.2f}",
             )
             self.actor_system.schedule_event(event)
             await asyncio.sleep(0.01)
+
+        message.processed = True
 
     # --- Internal stuff

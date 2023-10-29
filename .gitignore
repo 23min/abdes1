@@ -1,5 +1,8 @@
 TODO.md
 queueing_theory.md
+*.log
+*.png
+stats.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

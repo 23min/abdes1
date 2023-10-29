@@ -8,17 +8,18 @@ from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
-from abdes1.utils import logging
+from abdes1.utils.logger import Logger
 
 
 class Registry:
     def __init__(self) -> None:
         self.actors: List[ActorProtocol] = []
-        logging.log_event("-registry-", "Registry created")
+        self.logger = Logger("-registry-")
+        self.logger.info("Registry created")
 
     def register_actor(self, actor: ActorProtocol) -> None:
         self.actors.append(actor)
-        logging.log_event("-registry-", f"Actor '{actor.id}' registered")
+        self.logger.debug(f"Actor '{actor.id}' registered")
 
     def find_actor(self, target_actor: str) -> Optional[ActorProtocol]:
         for actor in self.actors:
@@ -26,5 +27,5 @@ class Registry:
                 return actor
             else:
                 continue
-        logging.log_event("-registry-", f"Actor '{target_actor}' not found")
+        self.logger.debug(f"Actor '{target_actor}' not found")
         return None

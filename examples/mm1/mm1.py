@@ -56,7 +56,7 @@ time_series: List[float] = []
 queue_depths: List[int] = []
 
 # Simulation loop
-for _ in range(20000):
+for _ in range(1000):
     (current_time, event_type) = event_queue.get()
     time_series.append(current_time)
     queue_depths.append(waiting_queue.qsize())
@@ -85,4 +85,5 @@ plt.xlabel("Time (seconds)")  # type: ignore
 plt.ylabel("Queue Depth")  # type: ignore
 plt.grid(True)  # type: ignore
 plt.tight_layout()  # type: ignore
-plt.show()  # type: ignore
+# plt.show()  # type: ignore
+plt.savefig("queue_depth_mm1.png")
