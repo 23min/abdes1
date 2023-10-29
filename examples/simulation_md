@@ -31,7 +31,6 @@ This is a cornerstone example in the world of simulation, often referred to as t
 
 We will strive for repeatable results that match those from mm1.py.
 There `random.seed(333)` is used and there is a `next_exponential` function that provides the next random number.
-These random numbers are used both for the arrival and for the departure of customers wrt the queue. But the model is failrly simplistic In a sense, he departure time is *predicted* based on the SERVICE_RATE. This is an optimization. In a model that resembles reality better, the service time would be decided inside the server (at random), not inside the queue. 
 
 In the first iteration, we can try to follow the simplistic m/m/1 model from mm1.py.
 
