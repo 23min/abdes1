@@ -103,13 +103,13 @@ class StatsActor(Actor):
         # save queue_depths to file
 
         # Write the arrival times and queue depths to a file
-        with open("stats.txt", "w") as file:
+        with open("mm1_actors.csv", "w") as file:
             file.write("time,queue_depth\n")
             for i in range(len(self.arrival_times)):
                 file.write(f"{self.arrival_times[i]},{self.queue_depths[i]}\n")
 
     def plot_stats(self) -> None:
-        with open("stats.txt", "r") as file:
+        with open("mm1_actors.csv", "r") as file:
             lines = file.readlines()[1:]  # Skip the header line
             data = [line.strip().split(",") for line in lines]
             times = [float(row[0]) for row in data]
@@ -118,6 +118,8 @@ class StatsActor(Actor):
         plt.title("M/M/1 Queue Simulation (Actors)")  # type: ignore
         plt.xlabel("Time (seconds)")  # type: ignore
         plt.ylabel("Queue Depth")  # type: ignore
+        plt.grid(True)  # type: ignore
+        plt.tight_layout()  # type: ignore
         plt.plot(  # type: ignore
             times,
             depths,

@@ -61,8 +61,9 @@ class ServerConfig:
 class LoadGeneratorConfig:
     id: str
     event_rate: float
-    duration: float
+    num_arrivals: int
     destination: str
+    duration: Optional[float] = None
 
 
 @dataclass
@@ -107,12 +108,13 @@ async def main(config_file: Optional[str]) -> None:
         )
         server_config = ServerConfig(
             id="server",
-            service_rate=1.5,
+            service_rate=1.8,
         )
         load_generator_config = LoadGeneratorConfig(
             id="arrivals",
             event_rate=1.8,
-            duration=10.0,
+            # duration=260.0,
+            num_arrivals=1000,
             destination="queue",
         )
         stats_config = StatsConfig(
@@ -165,10 +167,10 @@ async def main(config_file: Optional[str]) -> None:
     start_event = Event(time=0.0, message=start_message)
     actor_system.schedule_event(start_event)
 
-    report_time = load_generator_config.duration + 10.0
-    start_message = Message(type="save-stats", from_id="mm1-actors", to_id="stats", content=None, time=0.0)
-    start_event = Event(time=report_time, message=start_message)
-    actor_system.schedule_event(start_event)
+    # report_time = load_generator_config.duration + 10.0
+    # start_message = Message(type="save-stats", from_id="mm1-actors", to_id="stats", content=None, time=0.0)
+    # start_event = Event(time=report_time, message=start_message)
+    # actor_system.schedule_event(start_event)
 
     # Schedule a stop event or define a stop condition
     # after a certain time? TODO: Parametrize this

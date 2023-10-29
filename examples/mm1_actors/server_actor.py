@@ -18,11 +18,11 @@ from abdes1.core import ActorSystem, Event
 from abdes1.actors import Message
 from abdes1.des import DE_Actor
 
-# from abdes1.utils.logger import ALogger
+r = random.Random(222)
 
 
 def next_exponential(rate: float) -> float:
-    return float(-1 / rate * (log(1.0 - random.random())))
+    return float(-1 / rate * (log(1.0 - r.random())))
 
 
 class ServerActorArgs(TypedDict):
@@ -71,7 +71,7 @@ class ServerActor(DE_Actor):
     # When done, server schedules an event with a message "server-ready" to actor 'queue'
     async def process_message(self, message: Message) -> None:
         # Calculate random service time from service rate
-        service_time = random.expovariate(self.servce_rate)
+        service_time = next_exponential(self.servce_rate)
 
         self.logger.debug(
             f"Customer {message.content} service time: {service_time:.2f}",

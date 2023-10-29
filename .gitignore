@@ -2,6 +2,7 @@ TODO.md
 queueing_theory.md
 *.log
 *.png
+*.csv
 stats.txt
 
 # Byte-compiled / optimized / DLL files

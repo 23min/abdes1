@@ -18,10 +18,8 @@ This is done by generating a batch of events at the start of the simulation.
 """
 import random
 import asyncio
-from typing import TypedDict
+from typing import Optional
 from math import log
-
-# from enum import Enum
 
 
 # from typing import Any, Coroutine
@@ -31,23 +29,11 @@ from abdes1.des import DE_Actor
 from abdes1.utils.logger import ALogger
 
 
+random_arrivals = random.Random()
+
+
 def next_exponential(rate: float) -> float:
-    return -1 / rate * (log(1.0 - random.random()))
-
-
-class LoadGeneratorActorArgs(TypedDict):
-    """
-    Members:
-        id (str): Name of the actor
-        event_rate (float): average number of events generated per time unit
-        duration (float): length of time (simulation time) to generate events for
-        destination (str): id of the actor to send the events to
-    """
-
-    id: str
-    event_rate: float
-    duration: float
-    destination: str
+    return -1 / rate * (log(1.0 - random_arrivals.random()))
 
 
 class LoadGeneratorActor(DE_Actor):
@@ -55,13 +41,15 @@ class LoadGeneratorActor(DE_Actor):
         self,
         id: str,
         event_rate: float,
-        duration: float,
+        duration: Optional[float],
+        num_arrivals: int,
         destination: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
         self.event_rate = event_rate
         self.duration = duration
+        self.num_arrivals = num_arrivals
         self.destination = destination
         self.id = id
         self.logger = ALogger(id)
@@ -70,6 +58,8 @@ class LoadGeneratorActor(DE_Actor):
         # event_rate should be > 0
         # duration should be > 0
         # destination should be a valid actor id
+
+    random_arrivals.seed(333)
 
     async def run(self) -> None:
         await super().run()
@@ -106,7 +96,11 @@ class LoadGeneratorActor(DE_Actor):
         scheduled_time = self.actor_system.event_loop.current_time
 
         # Calculate the number of events to generate
-        num_events = int(self.event_rate * self.duration)
+        num_events = self.num_arrivals
+        if self.duration is not None:
+            num_events = int(self.event_rate * self.duration)
+
+        last_event_time = 0.0
 
         # Schedule events
         for i in range(num_events):
@@ -129,8 +123,16 @@ class LoadGeneratorActor(DE_Actor):
                 f"Generated arrival of '{customer}' after {next_arrival_time:.2f} at simulation time: {scheduled_time:.2f}",
             )
             self.actor_system.schedule_event(event)
+            last_event_time = scheduled_time
+
             await asyncio.sleep(0.01)
 
         message.processed = True
+
+        # Schedule a report event
+        report_time = last_event_time + 10.0
+        message = Message(type="save-stats", from_id="mm1-actors", to_id="stats", content=None, time=0.0)
+        evt = Event(time=report_time, message=message)
+        self.actor_system.schedule_event(evt)
 
     # --- Internal stuff

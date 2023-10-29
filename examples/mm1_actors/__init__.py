@@ -5,7 +5,6 @@ from .stats_actor import *
 
 __all__ = [
     "LoadGeneratorActor",
-    "LoadGeneratorActorArgs",
     "ServerActor",
     "ServerActorArgs",
     "StatsActor",

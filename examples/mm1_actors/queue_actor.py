@@ -158,6 +158,11 @@ class QueueActor(DE_Actor):
                         self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
                 else:
                     self._enqueue(arrival_time, message.content)
+
+                self.actor_system.dispatch_message(
+                    message=Message(type="queue-depth", from_id=self.id, to_id="stats", content=self.queue.qsize(), time=message.time),
+                )
+
                 self.server_ready = False
 
             if message.type == "server-ready":
@@ -178,14 +183,13 @@ class QueueActor(DE_Actor):
                 message_to_send = Message(type="customer", from_id=self.id, to_id=self.server, content=customer)
 
                 self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
+                self.server_ready = False
+                self.actor_system.dispatch_message(
+                    message=Message(type="queue-depth", from_id=self.id, to_id="stats", content=self.queue.qsize(), time=message.time),
+                )
 
         finally:
             message.processed = True
-
-        # # Send metric to stats actor
-        self.actor_system.dispatch_message(
-            message=Message(type="queue-depth", from_id=self.id, to_id="stats", content=self.queue.qsize(), time=message.time),
-        )
 
     # --- Internal stuff
 
