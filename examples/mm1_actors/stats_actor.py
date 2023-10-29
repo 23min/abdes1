@@ -17,8 +17,16 @@ Depending on the message type, it will perform certain tasks?
 
 """
 # import random
-import logging
 from typing import List
+import logging
+
+# Don't let matplotlib use my logger but instead reate a new logger object for matplotlib
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+mpl_handler = logging.StreamHandler()
+mpl_formatter = logging.Formatter("%(levelname)s: %(message)s")
+mpl_handler.setFormatter(mpl_formatter)
+mpl_logger.addHandler(mpl_handler)
 import matplotlib.pyplot as plt
 
 # from math import log
@@ -101,14 +109,6 @@ class StatsActor(Actor):
                 file.write(f"{self.arrival_times[i]},{self.queue_depths[i]}\n")
 
     def plot_stats(self) -> None:
-        # Don't let matplotlib use my logger but instead reate a new logger object for matplotlib
-        mpl_logger = logging.getLogger("matplotlib")
-        mpl_logger.setLevel(logging.WARNING)
-        mpl_handler = logging.StreamHandler()
-        mpl_formatter = logging.Formatter("%(levelname)s: %(message)s")
-        mpl_handler.setFormatter(mpl_formatter)
-        mpl_logger.addHandler(mpl_handler)
-
         with open("stats.txt", "r") as file:
             lines = file.readlines()[1:]  # Skip the header line
             data = [line.strip().split(",") for line in lines]

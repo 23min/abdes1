@@ -33,7 +33,6 @@ import json
 
 from dataclasses import asdict, dataclass
 
-# from matplotlib import pyplot as plt
 from pathlib import Path
 from typing import List, Optional, Tuple
 from dotenv import load_dotenv
@@ -88,24 +87,6 @@ def get_metrics() -> Tuple[list[float], List[int]]:
     time_series: List[float] = []
     queue_depths: List[int] = []
     return (time_series, queue_depths)
-
-
-# def plot_metrics(time_series: List[float], queue_depths: List[int]) -> None:
-#     # Plot the time series data
-#     plt.plot(  # type: ignore
-#         time_series,
-#         queue_depths,
-#         marker=None,
-#         linestyle="-",
-#         linewidth=0.5,
-#         color="black",
-#     )
-#     plt.title("M/M/1 Queue Simulation")  # type: ignore
-#     plt.xlabel("Time (seconds)")  # type: ignore
-#     plt.ylabel("Queue Depth")  # type: ignore
-#     plt.grid(True)  # type: ignore
-#     plt.tight_layout()  # type: ignore
-#     plt.show()  # type: ignore
 
 
 async def main(config_file: Optional[str]) -> None:

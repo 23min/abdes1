@@ -4,10 +4,10 @@ logger.py
 Make console output more consistent during initial development.
 """
 import logging
-from logging import Logger
+import os
 
 from copy import copy
-import os
+from logging import Logger
 from typing import Any, TYPE_CHECKING, Tuple
 from collections.abc import MutableMapping
 
@@ -16,6 +16,17 @@ if TYPE_CHECKING:
     _LoggerAdapter = logging.LoggerAdapter[logging.Logger]
 else:
     _LoggerAdapter = logging.LoggerAdapter
+
+
+loglevel = os.environ.get("LOGGING_LEVEL_DEFAULT") or "DEBUG"
+logging.basicConfig(
+    level=loglevel,
+    format="%(asctime)s [%(levelname)-8s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("myapp.log"),
+    ],
+)
 
 
 class Color:
@@ -66,30 +77,24 @@ class LoggerAdapter(_LoggerAdapter):
 class ALogger:
     def __init__(self, source: str) -> None:
         self.source = source
-        # Configure the logging system
-        loglevel = self._get_logging_level()
-        logging.basicConfig(
-            level=loglevel,
-            format="%(asctime)s [%(levelname)-8s] [%(source)-10s] %(message)s",
-            handlers=[
-                logging.StreamHandler(),
-                logging.FileHandler("myapp.log"),
-            ],
-        )
-        console_handler = logging.StreamHandler()
-        console_format = "%(asctime)s [%(levelname)-8s] [%(source)-10s] %(message)s"
-        console_handler.setFormatter(fmt=ColoredFormatter(console_format))
-        logging.getLogger().handlers[0] = console_handler
 
-        file_handler = logging.FileHandler("myapp.log")
-        file_formatter = logging.Formatter("%(asctime)s [%(levelname)-8s] [%(source)-10s] %(message)s")
-        file_handler.setFormatter(file_formatter)
-        logging.getLogger().handlers[1] = file_handler
-
-        logger = logging.getLogger(__name__)
+        # Create logger for the specific source and set propagate to False to avoid double logging
+        logger = logging.getLogger(f"{__name__}_{self.source}")
         logger.propagate = False
-        logger.addHandler(console_handler)  # Add a handler to the logger
-        logger.addHandler(file_handler)  # Add a handler to the logger
+        logger.setLevel(self._get_logging_level())
+
+        # Check if logger already has handlers to avoid adding them multiple times
+        if not logger.hasHandlers():
+            console_handler = logging.StreamHandler()
+            console_format = "%(asctime)s [%(levelname)-8s] [%(source)-10s] %(message)s"
+            console_handler.setFormatter(ColoredFormatter(console_format))
+            logger.addHandler(console_handler)
+
+            file_handler = logging.FileHandler("myapp.log")
+            file_formatter = logging.Formatter("%(asctime)s [%(levelname)-8s] [%(source)-10s] %(message)s")
+            file_handler.setFormatter(file_formatter)
+            logger.addHandler(file_handler)
+
         self.logger = LoggerAdapter(logger, {"source": source})
 
         self.warning(f"Loglevel for source '{self.source}' set to {loglevel}")
@@ -104,13 +109,7 @@ class ALogger:
         self.logger.info(message)
 
     def warning(self, message: str) -> None:
-        # logging.warning(self._format_message(self.source, message))
         self.logger.warning(message)
 
     def error(self, message: str) -> None:
-        # logging.error(self._format_message(self.source, message))
         self.logger.error(message)
-
-    # def _format_message(self, source: str, message: str) -> str:
-    #     extra_space: str = " " if "-" in source else ""
-    #     return f"[{source:10}] {extra_space}{message}"
