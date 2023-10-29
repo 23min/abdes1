@@ -24,7 +24,8 @@ from enum import Enum
 # from typing import Any, Coroutine
 from abdes1.core import ActorSystem, Event
 from abdes1.actors import Message
-from abdes1.utils.logger import Logger
+
+# from abdes1.utils.logger import ALogger
 from abdes1.des import DE_Actor
 
 
@@ -61,8 +62,8 @@ class QueueActor(DE_Actor):
         self.queue: Queue[Tuple[float, str]] = Queue()
         self.id = id
         self.server_ready: bool = False  # keep track of server state. Used in order to keep queue_actor reentrant.
-        self.logger = Logger(id)
-        self.logger.info("Queue actor created")
+        # self.logger = Logger(id)
+        # self.logger.info("Queue actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -114,7 +115,6 @@ class QueueActor(DE_Actor):
             #     self._enqueue(arrival_time, message.content)
             #     self.logger.debug(f"Queueing customer '{message.content}'. Arrival time {arrival_time} Queue size: {self.queue.qsize()}")
 
-
             #     return
 
             # Second or later customer:
@@ -127,7 +127,6 @@ class QueueActor(DE_Actor):
             # If server is not ready, enqueue message
 
             if message.type == "customer":
-
                 # If server is ready, send directly to server
                 #   customer was not queued, so time == arrival_time == scheduled_time
                 # Else, enqueue

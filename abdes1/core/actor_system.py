@@ -24,14 +24,14 @@ if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
     from abdes1.actors import Message
 from abdes1.core import Event, EventLoop, Registry
-from abdes1.utils import Logger
+from abdes1.utils import ALogger
 
 
 class ActorSystem:
     def __init__(self) -> None:
         self.registry = Registry()
         self._event_loop = EventLoop(True, self)
-        self.logger = Logger("-system-")
+        self.logger = ALogger("-system-")
         self.logger.info("Actor System created")
 
     async def run(self) -> None:

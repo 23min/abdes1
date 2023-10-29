@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 from abdes1.core import Event
 
 from abdes1.core.message_logger import MessageLogger
-from abdes1.utils.logger import Logger
+from abdes1.utils.logger import ALogger
 
 
 class EventLoop:
@@ -18,7 +18,7 @@ class EventLoop:
         self.actor_system = actor_system
         self.future_event_queue: PriorityQueue[Event] = PriorityQueue()
         self.current_time: float = 0.0
-        self.logger = Logger("-loop-")
+        self.logger = ALogger("-loop-")
         self.logger.info("Event loop created")
         self.message_logger = MessageLogger("-loop-")
 

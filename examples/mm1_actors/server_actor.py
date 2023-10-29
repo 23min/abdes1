@@ -17,11 +17,12 @@ from math import log
 from abdes1.core import ActorSystem, Event
 from abdes1.actors import Message
 from abdes1.des import DE_Actor
-from abdes1.utils.logger import Logger
+
+# from abdes1.utils.logger import ALogger
 
 
 def next_exponential(rate: float) -> float:
-    return -1 / rate * (log(1.0 - random.random()))
+    return float(-1 / rate * (log(1.0 - random.random())))
 
 
 class ServerActorArgs(TypedDict):
@@ -39,8 +40,8 @@ class ServerActor(DE_Actor):
         super().__init__(id, actor_system)
         self.servce_rate = service_rate
         self.id = id
-        self.logger = Logger(id)
-        self.logger.info("Server actor created")
+        # self.logger = Logger(id)
+        # self.logger.info("Server actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -91,6 +92,5 @@ class ServerActor(DE_Actor):
 
         self.actor_system.schedule_event(event)
         message.processed = True
-
 
     # --- Internal stuff

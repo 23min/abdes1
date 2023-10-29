@@ -28,7 +28,7 @@ from math import log
 from abdes1.core import ActorSystem, Event
 from abdes1.actors import Message
 from abdes1.des import DE_Actor
-from abdes1.utils.logger import Logger
+from abdes1.utils.logger import ALogger
 
 
 def next_exponential(rate: float) -> float:
@@ -64,7 +64,7 @@ class LoadGeneratorActor(DE_Actor):
         self.duration = duration
         self.destination = destination
         self.id = id
-        self.logger = Logger(id)
+        self.logger = ALogger(id)
         self.logger.info("Load Generator actor created")
         # TODO: Make sure the values are valid
         # event_rate should be > 0

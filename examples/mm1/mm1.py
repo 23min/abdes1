@@ -86,4 +86,4 @@ plt.ylabel("Queue Depth")  # type: ignore
 plt.grid(True)  # type: ignore
 plt.tight_layout()  # type: ignore
 # plt.show()  # type: ignore
-plt.savefig("queue_depth_mm1.png")
+plt.savefig("queue_depth_mm1.png")  # type: ignore

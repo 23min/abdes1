@@ -8,13 +8,13 @@ from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from abdes1.core import ActorProtocol
-from abdes1.utils.logger import Logger
+from abdes1.utils.logger import ALogger
 
 
 class Registry:
     def __init__(self) -> None:
         self.actors: List[ActorProtocol] = []
-        self.logger = Logger("-registry-")
+        self.logger = ALogger("-registry-")
         self.logger.info("Registry created")
 
     def register_actor(self, actor: ActorProtocol) -> None:

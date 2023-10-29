@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .message import Message
 from abdes1.core import ActorSystem
-from abdes1.utils.logger import Logger
+from abdes1.utils.logger import ALogger
 
 
 class Actor:
@@ -14,7 +14,7 @@ class Actor:
         self.id = id
         self.mailbox: Queue[Message] = Queue()
         self.actor_system = actor_system
-        self.logger = Logger(f"{self.id}")
+        self.logger = ALogger(f"{self.id}")
         self.logger.info(f"Actor '{self.id}' created")
 
     async def run(self) -> None:

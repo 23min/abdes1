@@ -10,14 +10,14 @@ if TYPE_CHECKING:
 from abdes1.actors.actor import Actor
 
 # from abdes1.core import ActorSystem
-from abdes1.utils.logger import Logger
+# from abdes1.utils.logger import ALogger
 
 
 class DE_Actor(Actor):
     def __init__(self, id: str, actor_system: ActorSystem) -> None:
         super().__init__(id, actor_system)
-        self.logger = Logger(f"{self.id}")
-        self.logger.info(f"DE Actor '{self.id}' created")
+        # self.logger = Logger(f"{self.id}")
+        # self.logger.info(f"DE Actor '{self.id}' created")
 
     async def run(self) -> None:
         self.logger.info(f"Actor '{self.id}' running")

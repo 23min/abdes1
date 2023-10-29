@@ -17,6 +17,7 @@ Depending on the message type, it will perform certain tasks?
 
 """
 # import random
+import logging
 from typing import List
 import matplotlib.pyplot as plt
 
@@ -25,7 +26,7 @@ import matplotlib.pyplot as plt
 from abdes1.core import ActorSystem  # , Event
 from abdes1.actors import Actor, Message
 
-from abdes1.utils.logger import Logger
+# from abdes1.utils.logger import ALogger
 
 # from abdes1.core.logger import log_message as log
 
@@ -44,8 +45,8 @@ class StatsActor(Actor):
         self.service_times: List[float] = []
         self.wait_times: List[float] = []
         self.output_path = output_path
-        self.logger = Logger("-stats-")
-        self.logger.info("Stats actor created")
+        # self.logger = Logger("-stats-")
+        # self.logger.info("Stats actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -100,6 +101,14 @@ class StatsActor(Actor):
                 file.write(f"{self.arrival_times[i]},{self.queue_depths[i]}\n")
 
     def plot_stats(self) -> None:
+        # Don't let matplotlib use my logger but instead reate a new logger object for matplotlib
+        mpl_logger = logging.getLogger("matplotlib")
+        mpl_logger.setLevel(logging.WARNING)
+        mpl_handler = logging.StreamHandler()
+        mpl_formatter = logging.Formatter("%(levelname)s: %(message)s")
+        mpl_handler.setFormatter(mpl_formatter)
+        mpl_logger.addHandler(mpl_handler)
+
         with open("stats.txt", "r") as file:
             lines = file.readlines()[1:]  # Skip the header line
             data = [line.strip().split(",") for line in lines]
@@ -109,7 +118,7 @@ class StatsActor(Actor):
         plt.title("M/M/1 Queue Simulation (Actors)")  # type: ignore
         plt.xlabel("Time (seconds)")  # type: ignore
         plt.ylabel("Queue Depth")  # type: ignore
-        plt.plot(
+        plt.plot(  # type: ignore
             times,
             depths,
             marker=None,
@@ -117,4 +126,4 @@ class StatsActor(Actor):
             linewidth=0.5,
             color="black",
         )
-        plt.savefig("queue_depth_mm1_actors.png")
+        plt.savefig("queue_depth_mm1_actors.png")  # type: ignore
