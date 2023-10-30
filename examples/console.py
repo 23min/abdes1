@@ -89,20 +89,14 @@ async def user_input_loop(actor_system: ActorSystem) -> None:
             break
 
         time = text_to_float(delay_s, lower_bound=0.0, upper_bound=10.0)
-        message = Message(
-            type="user-message",
-            from_id="console",
-            to_id=target_actor,
-            content=user_message,
-            time=time
-        )
+        message = Message(type="user-message", from_id="console", to_id=target_actor, content=user_message, time=time)
         event = Event(
             time=time,
             message=message,
         )
         actor_system.schedule_event(event)
 
-        print_formatted_text(HTML(f"<cyan>Simulation time (s) {actor_system.event_loop.current_time}</cyan>"))
+        print_formatted_text(HTML(f"<cyan>Simulation time (s) {time}</cyan>"))
 
         # The rest of the user input loop...
         # When you need to interact with async code, use:
