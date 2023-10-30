@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    # pylint: disable=cyclic-import
     from abdes1.actors import Message
 
     ...
@@ -16,52 +15,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# class Color:
-#     RESET = "\033[0m"
-#     BLACK = "\033[30m"
-#     RED = "\033[31m"
-#     GREEN = "\033[32m"
-#     YELLOW = "\033[33m"
-#     BLUE = "\033[34m"
-#     MAGENTA = "\033[35m"
-#     CYAN = "\033[36m"
-#     LIGHT_GRAY = "\033[37m"
-#     DARK_GRAY = "\033[90m"
-#     LIGHT_RED = "\033[91m"
-#     LIGHT_GREEN = "\033[92m"
-#     LIGHT_YELLOW = "\033[93m"
-#     LIGHT_BLUE = "\033[94m"
-#     LIGHT_MAGENTA = "\033[95m"
-#     LIGHT_CYAN = "\033[96m"
-#     WHITE = "\033[97m"
-
-
-# class ColoredFormatter(logging.Formatter):
-#     def format(self, record: logging.LogRecord) -> str:
-#         if record.levelno == logging.ERROR:
-#             record.msg = f"{Color.YELLOW}{record.msg}{Color.RESET}"
-#         elif record.levelno == logging.INFO:
-#             record.msg = f"{Color.CYAN}{record.msg}{Color.RESET}"
-#         elif record.levelno == logging.DEBUG:
-#             record.msg = f"{Color.DARK_GRAY}{record.msg}{Color.RESET}"
-#         return super().format(record)
-
-
 class MessageLogger(ALogger):
     def __init__(self, source: str) -> None:
         self.source = source
-        # logging.basicConfig(
-        #     # level=os.getenv("LOGGING_LEVEL", "DEBUG"),
-        #     level="INFO",
-        #     format="%(asctime)s [%(levelname)s] %(message)s",
-        #     handlers=[
-        #         logging.StreamHandler(),
-        #         logging.FileHandler("myapp.log"),
-        #     ],
-        # )
-        # logging.getLogger().handlers[0].setFormatter(fmt=ColoredFormatter())  # Use the custom formatter for console output
-        # logging.info(f"Message logger created for source '{source}'")
-
         super().__init__(source=source)
 
     def log_message(self, event_source: str, message: "Message") -> None:

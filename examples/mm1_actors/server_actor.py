@@ -40,8 +40,6 @@ class ServerActor(DE_Actor):
         super().__init__(id, actor_system)
         self.servce_rate = service_rate
         self.id = id
-        # self.logger = Logger(id)
-        # self.logger.info("Server actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -58,7 +56,6 @@ class ServerActor(DE_Actor):
             self.logger.debug(
                 f"Message received from '{message.from_id}': Customer '{message.content}' ready to be served!",
             )
-            # await self.process_message(message)
         else:
             raise Exception(
                 f"Invalid message type: {message.type}. Valid message types are: 'arrival', 'server-ready'",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import time
 
 # from asyncio import Queue
 from typing import TYPE_CHECKING
@@ -9,15 +10,10 @@ if TYPE_CHECKING:
     from abdes1.core import ActorSystem
 from abdes1.actors.actor import Actor
 
-# from abdes1.core import ActorSystem
-# from abdes1.utils.logger import ALogger
-
 
 class DE_Actor(Actor):
     def __init__(self, id: str, actor_system: ActorSystem) -> None:
         super().__init__(id, actor_system)
-        # self.logger = Logger(f"{self.id}")
-        # self.logger.info(f"DE Actor '{self.id}' created")
 
     async def run(self) -> None:
         self.logger.info(f"Actor '{self.id}' running")
@@ -43,19 +39,20 @@ class DE_Actor(Actor):
         self.mailbox.put_nowait(message)
         self.logger.debug(f"Added mailbox Message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}]. ")
 
+        timeout = 5  # or whatever value you deem appropriate
+        start_time = time.time()
         while not message.processed:
             await asyncio.sleep(0.01)
+            if time.time() - start_time > timeout:
+                self.logger.error(f"Timeout: Message was not processed in {timeout} seconds.")
+                break
+
         self.logger.debug(f"Message processed: {message}")
 
     async def process_message(self, message: Message) -> None:
         """
         Process a message from the mailbox. Override this method to implement the actor's logic.
+
+        WAARNING: This method must be called from any subclass otherwise receive will hang
         """
-        # print(f"DE Actor {self.id} processing message: {message}")
-
-        # TODO Implement message processing logic
-        # TODO Validate message is for this actor
-        # TODO Validate message format
-
-        # print(f"DE Actor {self.id} processed message: {message}")
         message.processed = True

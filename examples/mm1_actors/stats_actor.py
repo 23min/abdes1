@@ -29,14 +29,8 @@ mpl_handler.setFormatter(mpl_formatter)
 mpl_logger.addHandler(mpl_handler)
 import matplotlib.pyplot as plt
 
-# from math import log
-
 from abdes1.core import ActorSystem  # , Event
 from abdes1.actors import Actor, Message
-
-# from abdes1.utils.logger import ALogger
-
-# from abdes1.core.logger import log_message as log
 
 
 class StatsActor(Actor):
@@ -53,8 +47,6 @@ class StatsActor(Actor):
         self.service_times: List[float] = []
         self.wait_times: List[float] = []
         self.output_path = output_path
-        # self.logger = Logger("-stats-")
-        # self.logger.info("Stats actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -73,8 +65,6 @@ class StatsActor(Actor):
     # Server processes customer
     # When done, server sends message to queue "server-ready"
     async def process_message(self, message: Message) -> None:
-        # TODO Implement message processing logic
-
         # Aggregate metrics
         if message.type == "queue-depth":
             self.logger.debug(
@@ -94,14 +84,9 @@ class StatsActor(Actor):
 
         # self.actor_system.schedule_event_from_now(event)
 
-        pass
-
     # --- Internal stuff
 
     def save_stats(self) -> None:
-        # TODO Implement save stats logic
-        # save queue_depths to file
-
         # Write the arrival times and queue depths to a file
         with open("mm1_actors.csv", "w") as file:
             file.write("time,queue_depth\n")

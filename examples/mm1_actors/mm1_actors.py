@@ -142,14 +142,12 @@ async def main(config_file: Optional[str]) -> None:
     # queue.send_message(Message(type="configure", content=load_config(), time=0.0))
 
     # Create an instance of the server
-    # args = ResourceArgs(id="server-1", capacity=1)
     actor_system.register_actor(ServerActor, **asdict(server_config))
     # send a configuration message to the server
     # server = actor_system.get_actor("server-1")
     # server.send_message(Message(type="configure", content=load_config(), time=0.0))
 
     # Create an instance of the customer generator
-    # args = ProcessArgs(id="customer-generator-1")
     actor_system.register_actor(LoadGeneratorActor, **asdict(load_generator_config))
     # send a configuration message to the customer generator
     # customer_generator = actor_system.get_actor("customer-generator-1")
@@ -183,15 +181,6 @@ async def main(config_file: Optional[str]) -> None:
     # await asyncio.gather(actor_system.run())
     simulation_task = asyncio.create_task(actor_system.run())
     # asyncio.run(actor_system.run())
-
-    # Gather the metrics
-    # (time_series, queue_depths) = get_metrics()
-
-    # Print the results / statistics / show the plot
-    # print(f"Average queue depth: {sum(queue_depths) / len(queue_depths)}")
-    # print(f"Average wait time: {sum(time_series) / len(time_series)}")
-    # print(f"Average service time: {sum(time_series) / len(time_series)}")
-    # plot_metrics(time_series, queue_depths)
 
     # Stop the simulation
     await simulation_task

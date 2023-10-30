@@ -62,8 +62,6 @@ class QueueActor(DE_Actor):
         self.queue: Queue[Tuple[float, str]] = Queue()
         self.id = id
         self.server_ready: bool = False  # keep track of server state. Used in order to keep queue_actor reentrant.
-        # self.logger = Logger(id)
-        # self.logger.info("Queue actor created")
 
     async def run(self) -> None:
         await super().run()
@@ -107,25 +105,12 @@ class QueueActor(DE_Actor):
             self.logger.debug(f"Processing message: {message}")
 
             assert message.time is not None
+
             # arrival time is either the scheduled time or the time the message was sent
             arrival_time = message.time
 
-            # First customer, send directly to server
-            # if message.type == "customer" and message.content != "c_0":  # and not self.server_ready:
-            #     self._enqueue(arrival_time, message.content)
-            #     self.logger.debug(f"Queueing customer '{message.content}'. Arrival time {arrival_time} Queue size: {self.queue.qsize()}")
-
-            #     return
-
-            # Second or later customer:
-            #   if the queue is empty:
-            #       If the server is ready: send directly to server. The shedule time is the arrival-time.
-            #       Else, enqueue message.
-            #   Queue is not empty, enqueue message
-
             # If server is ready, send message directly to server
             # If server is not ready, enqueue message
-
             if message.type == "customer":
                 # If server is ready, send directly to server
                 #   customer was not queued, so time == arrival_time == scheduled_time
@@ -197,22 +182,14 @@ class QueueActor(DE_Actor):
         self.queue.put_nowait((arrival_time, customer))
 
     async def _dequeue(self) -> Optional[Tuple[float, str]]:
-        # return await self.queue.get()
         try:
             # 0.01 is a hack to avoid the queue.get() to block forever
             async with asyncio.timeout_at(asyncio.get_running_loop().time() + 0.01):
                 (arrival_time, customer) = await self.queue.get()
                 self.logger.debug(f"Got '{customer}' with arrival time {arrival_time:.2f} off the queue. Queue size: {self.queue.qsize()}")
                 return (arrival_time, customer)
-            # return await asyncio.wait_for(self.queue.get(), timeout=1)
-            # print(f"[{self.id}] Message received from {message.fromId}: Serving customer {customer}...")
-            # if self.last_server_message is not None:
-            # await self.actor_system.send_message(Message(self.id, self.last_server_message, customer))
 
         except TimeoutError:
-            # print(f"[{self.id}] Message received from {message.fromId}: No customers in queue.")
-            # if self.last_server_message is not None:
-            #     await self.actor_system.send_message(Message(self.id, self.last_server_message, None))
             return None
 
     def _get_depth(self) -> int:

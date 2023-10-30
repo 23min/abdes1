@@ -22,14 +22,6 @@ class Actor:
         while True:
             message = await self.mailbox.get()
             self.logger.debug(f"Handling mailbox message from '{message.from_id}': {message}. Mailbox size now [{self.mailbox.qsize()}].")
-            # TODO: Does time have any business here?
-            # if message.time > self.actor_system.event_loop.current_time:
-            #     logging.log_event(self.id, f" ==> Message is in the future! {message.time} > {self.actor_system.event_loop.current_time}")
-            #     # Message is in the future!
-            #     # Reschedule the message if it's too early to process it
-            #     # TODO Can't sleep this long. The simulation time may have advanced!
-            #     await asyncio.sleep(message.time - self.actor_system.event_loop.current_time)
-            # await self.receive(message)
             await self.process_message(message)
             await asyncio.sleep(0.01)
 

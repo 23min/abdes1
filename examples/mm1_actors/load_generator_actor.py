@@ -76,9 +76,7 @@ class LoadGeneratorActor(DE_Actor):
     # Or the number of events generated?
     async def receive(self, message: Message) -> None:
         if message.type == "start":
-            # print(f"[{self.id:10}] Start message received")
             self.logger.debug("Start message received")
-            # await self.process_message(message, target_actor=message.toId)
         await super().receive(message)
 
     # "customer" message: customer arrives
@@ -118,7 +116,6 @@ class LoadGeneratorActor(DE_Actor):
                     time=None,
                 ),
             )
-            # print(f"[{self.id:10}] Generated arrival after {next_arrival_time:.2f} at {arrival_time:.2f}")
             self.logger.debug(
                 f"Generated arrival of '{customer}' after {next_arrival_time:.2f} at simulation time: {scheduled_time:.2f}",
             )
