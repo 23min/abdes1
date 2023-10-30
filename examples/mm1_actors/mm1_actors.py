@@ -39,6 +39,7 @@ from dotenv import load_dotenv
 
 from abdes1 import ActorSystem, Event, Message
 from examples import LoadGeneratorActor, QueueActor, QueueType, ServerActor, StatsActor
+from abdes1.des import DE_EventLoop
 
 # create a config schema
 # from typing import TypedDict
@@ -126,7 +127,11 @@ async def main(config_file: Optional[str]) -> None:
         queue_config, server_config, load_generator_config, stats_config = load_config(config_file)
 
     # Create an instance of the actor system
-    actor_system = ActorSystem()
+
+    # We are creating a Discrete Event Simulation.
+    # Use the DE_EventLoop
+    event_loop = DE_EventLoop()
+    actor_system = ActorSystem(event_loop=event_loop)
 
     # Create an instance of the queue
     # kind: fifo, lifo, priority, ...

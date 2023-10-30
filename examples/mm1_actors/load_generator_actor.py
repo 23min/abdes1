@@ -91,7 +91,7 @@ class LoadGeneratorActor(DE_Actor):
         # What is the time of the last event? duration
 
         # Schedule a batch of events
-        scheduled_time = self.actor_system.event_loop.current_time
+        scheduled_time = 0.0
 
         # Calculate the number of events to generate
         num_events = self.num_arrivals

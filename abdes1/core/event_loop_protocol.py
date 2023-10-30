@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Protocol, TYPE_CHECKING
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from abdes1.actors import Message
@@ -7,9 +7,11 @@ if TYPE_CHECKING:
 
 
 class EventLoopProtocol(Protocol):
-    @property
-    def actor_system(self) -> Optional[ActorSystem]:
-        ...
+    actor_system: ActorSystem
+
+    # @property
+    # def actor_system(self) -> Optional[ActorSystem]:
+    #     ...
 
     async def run(self) -> None:
         ...
@@ -18,8 +20,4 @@ class EventLoopProtocol(Protocol):
         ...
 
     def schedule_event(self, event: Event) -> None:
-        ...
-
-    # TODO: This does not belong here! This needs to be in a DES event loop
-    def current_time(self) -> None:
         ...

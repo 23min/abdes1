@@ -21,16 +21,17 @@ from typing import Any, List, Optional, Type, TYPE_CHECKING
 import asyncio
 
 if TYPE_CHECKING:
-    from abdes1.core import ActorProtocol
+    from abdes1.core import ActorProtocol, EventLoopProtocol
     from abdes1.actors import Message
-from abdes1.core import Event, EventLoop, Registry
+from abdes1.core import Event, Registry
 from abdes1.utils import ALogger
 
 
 class ActorSystem:
-    def __init__(self) -> None:
+    def __init__(self, event_loop: EventLoopProtocol) -> None:
         self.registry = Registry()
-        self._event_loop = EventLoop(True, self)
+        self._event_loop = event_loop
+        self._event_loop.actor_system = self
         self.logger = ALogger("-system-")
         self.logger.info("Actor System created")
 
@@ -75,5 +76,5 @@ class ActorSystem:
         self._event_loop.dispatch_message(message)
 
     @property
-    def event_loop(self) -> EventLoop:
+    def event_loop(self) -> EventLoopProtocol:
         return self._event_loop

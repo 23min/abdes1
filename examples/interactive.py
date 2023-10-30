@@ -9,7 +9,7 @@ from prompt_toolkit.patch_stdout import patch_stdout  # type: ignore
 
 # scripts findability
 
-from abdes1.core import ActorSystem, Event
+from abdes1.core import ActorSystem, Event, EventLoop
 from abdes1.actors import Message, Actor, Resource, ResourceArgs
 from examples.console import user_input_loop
 
@@ -17,7 +17,8 @@ from examples.console import user_input_loop
 async def main():
     with patch_stdout(raw=True):
         print("creating actor system")
-        actor_system = ActorSystem()
+        event_loop = EventLoop(verbose=True)
+        actor_system = ActorSystem(event_loop=event_loop)
 
         # Define a couple of actors
         actor_system.register_actor(Actor, id="actor-1")
