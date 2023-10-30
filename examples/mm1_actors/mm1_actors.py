@@ -77,10 +77,10 @@ def load_config(path: str) -> Tuple[QueueConfig, ServerConfig, LoadGeneratorConf
     with open(path, "r") as f:
         config_data = json.load(f)
 
-        queue_config = QueueConfig(**config_data["queue_config"])
-        server_config = ServerConfig(**config_data["server_config"])
-        load_generator_config = LoadGeneratorConfig(**config_data["load_generator_config"])
-        stats_config = StatsConfig(**config_data["stats_config"])
+        queue_config = QueueConfig(**config_data["Queue"])
+        server_config = ServerConfig(**config_data["Server"])
+        load_generator_config = LoadGeneratorConfig(**config_data["LoadGenerator"])
+        stats_config = StatsConfig(**config_data["Stats"])
 
         return (queue_config, server_config, load_generator_config, stats_config)
 
@@ -91,7 +91,7 @@ def get_metrics() -> Tuple[list[float], List[int]]:
     return (time_series, queue_depths)
 
 
-async def main(config_file: Optional[str]) -> None:
+async def main(config_file: Optional[Path]) -> None:
     # Load environment variables from the global .env file
     load_dotenv()
 
@@ -124,7 +124,7 @@ async def main(config_file: Optional[str]) -> None:
         )
     else:
         # read the configuration from a file
-        queue_config, server_config, load_generator_config, stats_config = load_config(config_file)
+        queue_config, server_config, load_generator_config, stats_config = load_config(str(config_file))
 
     # Create an instance of the actor system
 
@@ -203,8 +203,11 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
+    config_file = Path(__file__).parent / "mm1_actors_config.json"
     if args.config and Path.exists(args.config):
-        asyncio.run(main(args.config))
+        asyncio.run(main(Path(args.config)))
+    elif Path.exists(config_file):
+        asyncio.run(main(config_file))
     else:
         print(f"File not found: {args.config}")
         asyncio.run(main(None))

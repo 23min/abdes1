@@ -1,0 +1,21 @@
+{
+    "Queue": {
+        "id": "queue",
+        "type": "FIFO",
+        "server": "server"
+    },
+    "Server": {
+        "id": "server",
+        "service_rate": 1.8
+    },
+    "LoadGenerator": {
+        "id": "arrivals",
+        "event_rate": 1.8,
+        "num_arrivals": 100,
+        "destination": "queue"
+    },
+    "Stats": {
+        "id": "stats",
+        "output_path": "mm1_actors.csv"
+    }
+}
