@@ -15,7 +15,7 @@ from examples.console import user_input_loop
 
 
 async def main():
-    with patch_stdout():
+    with patch_stdout(raw=True):
         print("creating actor system")
         actor_system = ActorSystem()
 

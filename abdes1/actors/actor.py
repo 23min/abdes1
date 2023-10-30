@@ -63,9 +63,9 @@ class Actor:
         """
         Process a message from the mailbox. Override this method to implement the actor's logic.
         """
-        print(f"Actor {self.id} processing message: {message}")
+        self.logger.debug(f"Actor {self.id} processing message: {message}")
         # TODO Implement message processing logic
         # TODO Validate message is for this actor
         # TODO Validate message format
-        print(f"Actor {self.id} processed message: {message}")
+        self.logger.debug(f"Actor {self.id} processed message: {message}")
         pass
