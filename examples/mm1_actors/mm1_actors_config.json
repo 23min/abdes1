@@ -3,19 +3,19 @@
         "id": "queue",
         "type": "FIFO",
         "server": "server",
-        "queues": "customer"
+        "entity_name": "customer"
     },
     "Server": {
         "id": "server",
         "service_rate": 1.8,
-        "serves": "customer"
+        "entity_name": "customer"
     },
     "DE_Arrivals": {
         "id": "arrivals",
         "event_rate": 1.8,
         "num_arrivals": 1000,
         "destination": "queue",
-        "generates": "customer"
+        "entity_name": "customer"
     },
     "Stats": {
         "id": "stats",

@@ -46,7 +46,7 @@ class QueueActorArgs(TypedDict):
     id: str
     type: QueueType
     server: str
-    queues: str
+    entity_name: str
 
 
 class QueueActor(DE_Actor):
@@ -55,12 +55,12 @@ class QueueActor(DE_Actor):
         id: str,
         type: QueueType,
         server: str,
-        queues: str,
+        entity_name: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
         self.server = server
-        self.queues = queues
+        self.entity_name = entity_name
         self.type = type
         self.queue: Queue[Tuple[float, str]] = Queue()
         self.id = id
@@ -77,7 +77,7 @@ class QueueActor(DE_Actor):
         # TODO Validate sender?
         # Validate message is for this actor
 
-        if message.type == self.queues:
+        if message.type == self.entity_name:
             self.logger.debug(f"Message received from '{message.from_id}': Entity {message.content} arrived!")
         elif message.type == "server-ready":
             self.server_ready = True
@@ -87,7 +87,7 @@ class QueueActor(DE_Actor):
             print(state)  # TODO: Should really send a message back to the sender
         else:
             raise Exception(
-                f"Invalid message type: {message.type}. Valid message types are: '{self.queues}', 'server-ready'",
+                f"Invalid message type: {message.type}. Valid message types are: '{self.entity_name}', 'server-ready'",
             )
 
         await super().receive(message)
@@ -114,15 +114,15 @@ class QueueActor(DE_Actor):
 
             # If server is ready, send message directly to server
             # If server is not ready, enqueue message
-            if message.type == self.queues:
+            if message.type == self.entity_name:
                 # If server is ready, send directly to server
                 #   entity was not queued, so time == arrival_time == scheduled_time
                 # Else, enqueue
 
                 if self.server_ready:
                     if self.queue.empty():
-                        self.logger.debug(f"Queue is empty. Sending {self.queues} '{message.content}' directly to '{self.server}'")
-                        message_to_send = Message(type=self.queues, from_id=self.id, to_id=self.server, content=message.content)
+                        self.logger.debug(f"Queue is empty. Sending {self.entity_name} '{message.content}' directly to '{self.server}'")
+                        message_to_send = Message(type=self.entity_name, from_id=self.id, to_id=self.server, content=message.content)
                         self.actor_system.schedule_event(Event(time=arrival_time, message=message_to_send))
                     else:
                         # Dequeue entity and send to server
@@ -130,8 +130,8 @@ class QueueActor(DE_Actor):
                         # scheduled_time = time 'server-ready' was received = msessage.secheduled_time
 
                         self.logger.debug(
-                            f"Queue is not empty. Dequeueing {self.queues} '{message.content}' and sending to '{self.server}'.\
-                                  Queueing {self.queues} '{message.content}'"
+                            f"Queue is not empty. Dequeueing {self.entity_name} '{message.content}' and sending to '{self.server}'.\
+                                  Queueing {self.entity_name} '{message.content}'"
                         )
 
                         self._enqueue(arrival_time, message.content)
@@ -141,7 +141,7 @@ class QueueActor(DE_Actor):
 
                         (_, entity) = result
                         message_to_send = Message(
-                            type=self.queues,
+                            type=self.entity_name,
                             from_id=self.id,
                             to_id=self.server,
                             content=entity,
@@ -170,8 +170,8 @@ class QueueActor(DE_Actor):
 
                 # TODO: We can calculate the wait time here!
 
-                self.logger.debug(f"Sending {self.queues} ({entity}) at the head of the queue to '{self.server}'")
-                message_to_send = Message(type=self.queues, from_id=self.id, to_id=self.server, content=entity)
+                self.logger.debug(f"Sending {self.entity_name} ({entity}) at the head of the queue to '{self.server}'")
+                message_to_send = Message(type=self.entity_name, from_id=self.id, to_id=self.server, content=entity)
 
                 self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
                 self.server_ready = False

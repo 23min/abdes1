@@ -49,14 +49,14 @@ class QueueConfig:
     id: str
     type: QueueType
     server: str
-    queues: str
+    entity_name: str
 
 
 @dataclass
 class ServerConfig:
     id: str
     service_rate: float
-    serves: str
+    entity_name: str
 
 
 @dataclass
@@ -65,7 +65,7 @@ class ArrivalsConfig:
     event_rate: float
     num_arrivals: int
     destination: str
-    generates: str
+    entity_name: str
     duration: Optional[float] = None
 
 
@@ -108,12 +108,12 @@ async def main(config_file: Optional[Path]) -> None:
             id="queue",
             type=QueueType.FIFO,
             server="server",
-            queues="customer",
+            entity_name="customer",
         )
         server_config = ServerConfig(
             id="server",
             service_rate=1.8,
-            serves="customer",
+            entity_name="customer",
         )
         load_generator_config = ArrivalsConfig(
             id="arrivals",
@@ -121,7 +121,7 @@ async def main(config_file: Optional[Path]) -> None:
             # duration=260.0,
             num_arrivals=1000,
             destination="queue",
-            generates="customer",
+            entity_name="customer",
         )
         stats_config = StatsConfig(
             id="stats",

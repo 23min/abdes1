@@ -27,7 +27,7 @@ async def test_queue_can_enqueue() -> None:
             id="q",
             type=QueueType.FIFO,
             server="dummy-server",
-            queues="customer",
+            entity_name="customer",
         ),
     )
 
