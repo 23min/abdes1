@@ -12,7 +12,7 @@ from prompt_toolkit.patch_stdout import patch_stdout  # type: ignore
 from abdes1.core import ActorSystem, Event
 from abdes1.des import DE_EventLoop
 from abdes1.actors import Message, Actor, Resource, ResourceArgs
-from examples.console import user_input_loop
+from .console import user_input_loop
 
 
 async def main():

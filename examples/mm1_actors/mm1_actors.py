@@ -38,8 +38,7 @@ from typing import List, Optional, Tuple
 from dotenv import load_dotenv
 
 from abdes1 import ActorSystem, Event, Message
-from examples import LoadGeneratorActor, QueueActor, QueueType, ServerActor, StatsActor
-from abdes1.des import DE_EventLoop
+from abdes1.des import DE_EventLoop, QueueActor, QueueType, ServerActor, StatsActor, LoadGeneratorActor
 
 # create a config schema
 # from typing import TypedDict

@@ -4,7 +4,7 @@ from typing import cast
 
 from abdes1.actors import Actor, Message
 from abdes1.core import ActorSystem, Event, EventLoop
-from examples.mm1_actors import QueueActor, QueueActorArgs, QueueType
+from abdes1.des import QueueActor, QueueActorArgs, QueueType
 
 # All test coroutines will be treated as marked.
 pytestmark = pytest.mark.asyncio
