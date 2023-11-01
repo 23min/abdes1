@@ -17,9 +17,7 @@ class EventLoop:
 
     def __init__(
         self,
-        verbose: bool,
     ) -> None:
-        self.verbose = verbose
         self.future_event_queue: PriorityQueue[Event] = PriorityQueue()
         self.logger = ALogger("-loop-")
         self.logger.info("Event loop created")
@@ -40,8 +38,7 @@ class EventLoop:
         while True:
             event = await self.future_event_queue.get()
 
-            if self.verbose:
-                self.logger.debug(f"Processing message {event.message} with scheduled time {event.time:>.2f}")
+            self.logger.debug(f"Processing message {event.message} with scheduled time {event.time:>.2f}")
 
             assert event.time is not None, "message.scheduled_time is None"
 

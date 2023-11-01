@@ -8,7 +8,7 @@ A queue actor is an actor that behaves like a queue:
 - it sends messages
 - it has a queue of messages
 
-This queue contains customers that arrive and wait to be served by a server.
+This queue contains entities that arrive and wait to be served by a server.
 
 Typically, a FIFO queue is used in an m/m/1 queueing system.
 In an m/m/1 queueing system, there is only one server.
@@ -46,6 +46,7 @@ class QueueActorArgs(TypedDict):
     id: str
     type: QueueType
     server: str
+    queues: str
 
 
 class QueueActor(DE_Actor):
@@ -54,10 +55,12 @@ class QueueActor(DE_Actor):
         id: str,
         type: QueueType,
         server: str,
+        queues: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
         self.server = server
+        self.queues = queues
         self.type = type
         self.queue: Queue[Tuple[float, str]] = Queue()
         self.id = id
@@ -74,8 +77,8 @@ class QueueActor(DE_Actor):
         # TODO Validate sender?
         # Validate message is for this actor
 
-        if message.type == "customer":
-            self.logger.debug(f"Message received from '{message.from_id}': Customer {message.content} arrived!")
+        if message.type == self.queues:
+            self.logger.debug(f"Message received from '{message.from_id}': Entity {message.content} arrived!")
         elif message.type == "server-ready":
             self.server_ready = True
             self.logger.debug(f"Message received from '{message.from_id}': Server ready!")
@@ -84,17 +87,17 @@ class QueueActor(DE_Actor):
             print(state)  # TODO: Should really send a message back to the sender
         else:
             raise Exception(
-                f"Invalid message type: {message.type}. Valid message types are: 'customer', 'server-ready'",
+                f"Invalid message type: {message.type}. Valid message types are: '{self.queues}', 'server-ready'",
             )
 
         await super().receive(message)
 
-    # Arrival message: customer arrives -> enqueue
+    # Arrival message: entity arrives -> enqueue
     # Server ready message: server ready ->
-    #   dequeue + send message to server "serve customer"
+    #   dequeue + send message to server "serve entity"
     #
-    # 1. Message "customer" received from generator.
-    #    If it is the first customer ('start'), send directly to server
+    # 1. Message "entity" received from generator.
+    #    If it is the first entity and the queue is empty, send directly to server
     #    If there is a queue, enqueue message
     #    Else, if server is ready and queue is empty, send message direcetly to server
     # 2. Message "server-ready" received from server.
@@ -111,34 +114,37 @@ class QueueActor(DE_Actor):
 
             # If server is ready, send message directly to server
             # If server is not ready, enqueue message
-            if message.type == "customer":
+            if message.type == self.queues:
                 # If server is ready, send directly to server
-                #   customer was not queued, so time == arrival_time == scheduled_time
+                #   entity was not queued, so time == arrival_time == scheduled_time
                 # Else, enqueue
 
                 if self.server_ready:
                     if self.queue.empty():
-                        self.logger.debug(f"Queue is empty. Sending customer '{message.content}' directly to '{self.server}'")
-                        message_to_send = Message(type="customer", from_id=self.id, to_id=self.server, content=message.content)
+                        self.logger.debug(f"Queue is empty. Sending {self.queues} '{message.content}' directly to '{self.server}'")
+                        message_to_send = Message(type=self.queues, from_id=self.id, to_id=self.server, content=message.content)
                         self.actor_system.schedule_event(Event(time=arrival_time, message=message_to_send))
                     else:
-                        # Dequeue customer and send to server
+                        # Dequeue entity and send to server
                         # Enqueue incoming message
                         # scheduled_time = time 'server-ready' was received = msessage.secheduled_time
 
-                        self.logger.debug(f"Queue is not empty. Dequeueing customer '{message.content}' and sending to '{self.server}'. Queueing customer '{message.content}'")
+                        self.logger.debug(
+                            f"Queue is not empty. Dequeueing {self.queues} '{message.content}' and sending to '{self.server}'.\
+                                  Queueing {self.queues} '{message.content}'"
+                        )
 
                         self._enqueue(arrival_time, message.content)
                         result = await self._dequeue()
                         if result is None:
                             raise Exception("Invalid result from dequeue")
 
-                        (_, customer) = result
+                        (_, entity) = result
                         message_to_send = Message(
-                            type="customer",
+                            type=self.queues,
                             from_id=self.id,
                             to_id=self.server,
-                            content=customer,
+                            content=entity,
                         )
                         self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
                 else:
@@ -156,16 +162,16 @@ class QueueActor(DE_Actor):
                 # This is equal to the previous "server_ready" time plus the service time
 
                 if (result := await self._dequeue()) is not None:
-                    _, customer = result
+                    _, entity = result
                 else:
-                    # No customers in queue, but server state is ready.
-                    # As soon as a customer arrives, the customer will be sent to the server
+                    # No entities in queue, but server state is ready.
+                    # As soon as an entity arrives, the entity will be sent to the server
                     return
 
                 # TODO: We can calculate the wait time here!
 
-                self.logger.debug(f"Sending customer ({customer}) at the head of the queue to '{self.server}'")
-                message_to_send = Message(type="customer", from_id=self.id, to_id=self.server, content=customer)
+                self.logger.debug(f"Sending {self.queues} ({entity}) at the head of the queue to '{self.server}'")
+                message_to_send = Message(type=self.queues, from_id=self.id, to_id=self.server, content=entity)
 
                 self.actor_system.schedule_event(Event(time=message.time, message=message_to_send))
                 self.server_ready = False
@@ -178,16 +184,16 @@ class QueueActor(DE_Actor):
 
     # --- Internal stuff
 
-    def _enqueue(self, arrival_time: float, customer: str) -> None:
-        self.queue.put_nowait((arrival_time, customer))
+    def _enqueue(self, arrival_time: float, entity: str) -> None:
+        self.queue.put_nowait((arrival_time, entity))
 
     async def _dequeue(self) -> Optional[Tuple[float, str]]:
         try:
             # 0.01 is a hack to avoid the queue.get() to block forever
             async with asyncio.timeout_at(asyncio.get_running_loop().time() + 0.01):
-                (arrival_time, customer) = await self.queue.get()
-                self.logger.debug(f"Got '{customer}' with arrival time {arrival_time:.2f} off the queue. Queue size: {self.queue.qsize()}")
-                return (arrival_time, customer)
+                (arrival_time, entity) = await self.queue.get()
+                self.logger.debug(f"Got '{entity}' with arrival time {arrival_time:.2f} off the queue. Queue size: {self.queue.qsize()}")
+                return (arrival_time, entity)
 
         except TimeoutError:
             return None

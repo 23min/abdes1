@@ -2,17 +2,20 @@
     "Queue": {
         "id": "queue",
         "type": "FIFO",
-        "server": "server"
+        "server": "server",
+        "queues": "customer"
     },
     "Server": {
         "id": "server",
-        "service_rate": 1.8
+        "service_rate": 1.8,
+        "serves": "customer"
     },
     "LoadGenerator": {
         "id": "arrivals",
         "event_rate": 1.8,
-        "num_arrivals": 100,
-        "destination": "queue"
+        "num_arrivals": 1000,
+        "destination": "queue",
+        "generates": "customer"
     },
     "Stats": {
         "id": "stats",

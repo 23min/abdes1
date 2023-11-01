@@ -13,6 +13,7 @@ Depending on the message type, it will perform certain tasks?
 - "customer-queued"
 - "customer-dequeued"
 - "server-ready"
+- "queue-depth"
 - ?
 
 """
@@ -61,8 +62,8 @@ class StatsActor(Actor):
 
         await super().receive(message)
 
-    # "customer" message: customer arrives
-    # Server processes customer
+    # Entity arrives
+    # Server processes entity
     # When done, server sends message to queue "server-ready"
     async def process_message(self, message: Message) -> None:
         # Aggregate metrics

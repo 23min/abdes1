@@ -44,6 +44,7 @@ class LoadGeneratorActor(DE_Actor):
         duration: Optional[float],
         num_arrivals: int,
         destination: str,
+        generates: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
@@ -51,6 +52,7 @@ class LoadGeneratorActor(DE_Actor):
         self.duration = duration
         self.num_arrivals = num_arrivals
         self.destination = destination
+        self.generates = generates
         self.id = id
         self.logger = ALogger(id)
         self.logger.info("Load Generator actor created")
@@ -79,8 +81,8 @@ class LoadGeneratorActor(DE_Actor):
             self.logger.debug("Start message received")
         await super().receive(message)
 
-    # "customer" message: customer arrives
-    # Server processes customer
+    # Generates entity: entity arrives
+    # Server processes entity
     # When done, server sends message to queue "server-ready"
     async def process_message(self, message: Message) -> None:
         # based on event_rate (arrival_rate), generate a batch of events
@@ -104,20 +106,20 @@ class LoadGeneratorActor(DE_Actor):
         for i in range(num_events):
             next_arrival_time = next_exponential(self.event_rate)
             scheduled_time += next_arrival_time
-            customer = f"c_{i}"
+            entity = f"entity_{i}"
             event = Event(
                 time=scheduled_time,
                 # target_actor_id=target_actor or "",  # TODO Should be a 'deadletter' actor
                 message=Message(
-                    type="customer",
+                    type=self.generates,
                     from_id=self.id,
                     to_id=self.destination,
-                    content=customer,
+                    content=entity,
                     time=None,
                 ),
             )
             self.logger.debug(
-                f"Generated arrival of '{customer}' after {next_arrival_time:.2f} at simulation time: {scheduled_time:.2f}",
+                f"Generated arrival of '{entity}' after {next_arrival_time:.2f} at simulation time: {scheduled_time:.2f}",
             )
             self.actor_system.schedule_event(event)
             last_event_time = scheduled_time

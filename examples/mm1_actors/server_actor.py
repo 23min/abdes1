@@ -35,10 +35,12 @@ class ServerActor(DE_Actor):
         self,
         id: str,
         service_rate: float,
+        serves: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
         self.servce_rate = service_rate
+        self.serves = serves
         self.id = id
 
     async def run(self) -> None:
@@ -52,9 +54,9 @@ class ServerActor(DE_Actor):
         # TODO Validate sender?
         # Validate message is for this actor
 
-        if message.type == "customer":
+        if message.type == self.serves:
             self.logger.debug(
-                f"Message received from '{message.from_id}': Customer '{message.content}' ready to be served!",
+                f"Message received from '{message.from_id}': {self.serves.capitalize} '{message.content}' ready to be served!",
             )
         else:
             raise Exception(
@@ -63,15 +65,15 @@ class ServerActor(DE_Actor):
 
         await super().receive(message)
 
-    # "customer" message: customer arrives
-    # Server processes customer
+    # Entity arrives
+    # Server processes entity
     # When done, server schedules an event with a message "server-ready" to actor 'queue'
     async def process_message(self, message: Message) -> None:
         # Calculate random service time from service rate
         service_time = next_exponential(self.servce_rate)
 
         self.logger.debug(
-            f"Customer {message.content} service time: {service_time:.2f}",
+            f"{self.serves.capitalize} {message.content} service time: {service_time:.2f}",
         )
 
         if message.time is None:
@@ -79,7 +81,7 @@ class ServerActor(DE_Actor):
         future_event_time = message.time + service_time
 
         # Schedule departure event
-        # The customer doesn't actually depart, he/she evaporates
+        # The entity doesn't actually depart, he/she/it evaporates
         # We just send a message to the queue that the server is ready
         # (Actually, this is a future event because all this happens instantly in the server)
         event = Event(

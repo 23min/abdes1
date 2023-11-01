@@ -3,7 +3,7 @@ import asyncio
 from typing import cast
 
 from abdes1.actors import Actor, Message
-from abdes1.core import ActorSystem, Event
+from abdes1.core import ActorSystem, Event, EventLoop
 from examples.mm1_actors import QueueActor, QueueActorArgs, QueueType
 
 # All test coroutines will be treated as marked.
@@ -12,7 +12,8 @@ pytestmark = pytest.mark.asyncio
 
 # @pytest.mark.asyncio
 async def test_queue_can_enqueue() -> None:
-    s = ActorSystem()
+    e = EventLoop()
+    s = ActorSystem(e)
 
     # q = QueueActor(
     #     "q",
@@ -26,6 +27,7 @@ async def test_queue_can_enqueue() -> None:
             id="q",
             type=QueueType.FIFO,
             server="dummy-server",
+            queues="customer",
         ),
     )
 
@@ -52,7 +54,6 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
-        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
@@ -64,7 +65,6 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
-        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
@@ -76,7 +76,6 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
-        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
@@ -88,7 +87,6 @@ async def test_queue_can_enqueue() -> None:
         to_id="q",
         content=None,
         time=0,
-        scheduled_time=0,
     )
     s.schedule_event(Event(time=0, message=m))
     await asyncio.sleep(1)
