@@ -10,7 +10,7 @@
         "service_rate": 1.8,
         "serves": "customer"
     },
-    "LoadGenerator": {
+    "DE_Arrivals": {
         "id": "arrivals",
         "event_rate": 1.8,
         "num_arrivals": 1000,

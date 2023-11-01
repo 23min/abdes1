@@ -1,5 +1,5 @@
 """
-load_generator_actor.py
+des_arrivals.py
 
 Provides an implementation of a generator actor.
 
@@ -36,7 +36,7 @@ def next_exponential(rate: float) -> float:
     return -1 / rate * (log(1.0 - random_arrivals.random()))
 
 
-class LoadGeneratorActor(DE_Actor):
+class DE_Arrivals(DE_Actor):
     def __init__(
         self,
         id: str,
@@ -55,7 +55,7 @@ class LoadGeneratorActor(DE_Actor):
         self.generates = generates
         self.id = id
         self.logger = ALogger(id)
-        self.logger.info("Load Generator actor created")
+        self.logger.info("Arrivals actor created")
         # TODO: Make sure the values are valid
         # event_rate should be > 0
         # duration should be > 0

@@ -15,7 +15,7 @@ Implementation of an m/m/1 queueing system with actors
 
 4. Create an instance of the server
 
-5. What about the arrivals? A customer generator. Create an instance of the customer generator
+5. What about the arrivals? A generator. Create an instance of the customer generator
 
 6. Schedule an initial event to start the simulation
 
@@ -38,7 +38,7 @@ from typing import List, Optional, Tuple
 from dotenv import load_dotenv
 
 from abdes1 import ActorSystem, Event, Message
-from abdes1.des import DE_EventLoop, QueueActor, QueueType, ServerActor, StatsActor, LoadGeneratorActor
+from abdes1.des import DE_EventLoop, QueueActor, QueueType, ServerActor, StatsActor, DE_Arrivals
 
 # create a config schema
 # from typing import TypedDict
@@ -60,7 +60,7 @@ class ServerConfig:
 
 
 @dataclass
-class LoadGeneratorConfig:
+class ArrivalsConfig:
     id: str
     event_rate: float
     num_arrivals: int
@@ -75,13 +75,13 @@ class StatsConfig:
     output_path: str
 
 
-def load_config(path: str) -> Tuple[QueueConfig, ServerConfig, LoadGeneratorConfig, StatsConfig]:
+def load_config(path: str) -> Tuple[QueueConfig, ServerConfig, ArrivalsConfig, StatsConfig]:
     with open(path, "r") as f:
         config_data = json.load(f)
 
         queue_config = QueueConfig(**config_data["Queue"])
         server_config = ServerConfig(**config_data["Server"])
-        load_generator_config = LoadGeneratorConfig(**config_data["LoadGenerator"])
+        load_generator_config = ArrivalsConfig(**config_data["DE_Arrivals"])
         stats_config = StatsConfig(**config_data["Stats"])
 
         return (queue_config, server_config, load_generator_config, stats_config)
@@ -115,7 +115,7 @@ async def main(config_file: Optional[Path]) -> None:
             service_rate=1.8,
             serves="customer",
         )
-        load_generator_config = LoadGeneratorConfig(
+        load_generator_config = ArrivalsConfig(
             id="arrivals",
             event_rate=1.8,
             # duration=260.0,
@@ -158,7 +158,7 @@ async def main(config_file: Optional[Path]) -> None:
     # server.send_message(Message(type="configure", content=load_config(), time=0.0))
 
     # Create an instance of the customer generator
-    actor_system.register_actor(LoadGeneratorActor, **asdict(load_generator_config))
+    actor_system.register_actor(DE_Arrivals, **asdict(load_generator_config))
     # send a configuration message to the customer generator
     # customer_generator = actor_system.get_actor("customer-generator-1")
     # customer_generator.send_message(Message(type="configure", content=load_config(), time=0.0))
