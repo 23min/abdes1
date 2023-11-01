@@ -36,7 +36,7 @@ def next_exponential(rate: float) -> float:
     return -1 / rate * (log(1.0 - random_arrivals.random()))
 
 
-class DE_Arrivals(DE_Actor):
+class Generator(DE_Actor):
     def __init__(
         self,
         id: str,

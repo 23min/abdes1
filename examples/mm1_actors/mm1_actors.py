@@ -38,7 +38,7 @@ from typing import List, Optional, Tuple
 from dotenv import load_dotenv
 
 from abdes1 import ActorSystem, Event, Message
-from abdes1.des import DE_EventLoop, QueueActor, QueueType, ServerActor, StatsActor, DE_Arrivals
+from abdes1.des import DE_EventLoop, QueueActor, QueueType, ServerActor, StatsActor, Generator
 
 # create a config schema
 # from typing import TypedDict
@@ -158,7 +158,7 @@ async def main(config_file: Optional[Path]) -> None:
     # server.send_message(Message(type="configure", content=load_config(), time=0.0))
 
     # Create an instance of the customer generator
-    actor_system.register_actor(DE_Arrivals, **asdict(load_generator_config))
+    actor_system.register_actor(Generator, **asdict(load_generator_config))
     # send a configuration message to the customer generator
     # customer_generator = actor_system.get_actor("customer-generator-1")
     # customer_generator.send_message(Message(type="configure", content=load_config(), time=0.0))
