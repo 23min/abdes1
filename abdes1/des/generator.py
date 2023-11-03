@@ -44,7 +44,7 @@ class Generator(DE_Actor):
         duration: Optional[float],
         num_arrivals: int,
         destination: str,
-        generates: str,
+        entity_name: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
@@ -52,7 +52,7 @@ class Generator(DE_Actor):
         self.duration = duration
         self.num_arrivals = num_arrivals
         self.destination = destination
-        self.generates = generates
+        self.entity_name = entity_name
         self.id = id
         self.logger = ALogger(id)
         self.logger.info("Arrivals actor created")
@@ -111,7 +111,7 @@ class Generator(DE_Actor):
                 time=scheduled_time,
                 # target_actor_id=target_actor or "",  # TODO Should be a 'deadletter' actor
                 message=Message(
-                    type=self.generates,
+                    type=self.entity_name,
                     from_id=self.id,
                     to_id=self.destination,
                     content=entity,

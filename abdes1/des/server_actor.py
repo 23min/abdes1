@@ -35,12 +35,12 @@ class ServerActor(DE_Actor):
         self,
         id: str,
         service_rate: float,
-        serves: str,
+        entity_name: str,
         actor_system: ActorSystem,
     ) -> None:
         super().__init__(id, actor_system)
         self.servce_rate = service_rate
-        self.serves = serves
+        self.entity_name = entity_name
         self.id = id
 
     async def run(self) -> None:
@@ -54,9 +54,9 @@ class ServerActor(DE_Actor):
         # TODO Validate sender?
         # Validate message is for this actor
 
-        if message.type == self.serves:
+        if message.type == self.entity_name:
             self.logger.debug(
-                f"Message received from '{message.from_id}': {self.serves.capitalize} '{message.content}' ready to be served!",
+                f"Message received from '{message.from_id}': {self.entity_name.capitalize} '{message.content}' ready to be served!",
             )
         else:
             raise Exception(
@@ -73,7 +73,7 @@ class ServerActor(DE_Actor):
         service_time = next_exponential(self.servce_rate)
 
         self.logger.debug(
-            f"{self.serves.capitalize} {message.content} service time: {service_time:.2f}",
+            f"{self.entity_name.capitalize} {message.content} service time: {service_time:.2f}",
         )
 
         if message.time is None:

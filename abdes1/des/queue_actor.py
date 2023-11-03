@@ -180,7 +180,7 @@ class QueueActor(DE_Actor):
                 )
 
         finally:
-            message.processed = True
+            await super().process_message(message)
 
     # --- Internal stuff
 
