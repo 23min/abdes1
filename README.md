@@ -73,3 +73,27 @@ In addition, I wish to fully understand and control the simulation environment a
 
 Footnote:
 [^1]: Since then, I have found the [Ptolemy Project](https://ptolemy.berkeley.edu/)).
+
+---
+
+# Progress Notes
+
+## 2023-11-03
+
+abdes1 can now run a single server queue simulation (m/m/1) and get exactly the same results as loop based  reference implementation.
+
+The reference implementation is a standalone module: `examples/mm1/mm1.py`.
+The abdes1 implementation is defined in `examples/mm1_actors/mm1_actors.py`.
+
+In order to get reproducible and comparable results, each solution must use the same random numbers.
+Abdes1 uses two random number generators, one for calculating arrival times, and another one for the service times.
+
+The reference implementation initially only used one random number generator. This was modified so the reference implementation now also uses two random number generators.
+
+Output from m/m/1 reference implementation:
+
+![Output from m/m/1 reference implementation](assets/queue_depth_mm1.png)
+
+Output from abdes1 implementation:
+
+![Output from abdes1 implementation](assets/queue_depth_mm1_actors.png)
