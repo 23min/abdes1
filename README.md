@@ -53,7 +53,7 @@ With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here 
 - Metrics / Statistical accumulators / Logging and monitoring
 - Termination conditions and implementation
 - Random number genertion / how is randomness achieved or determinism guaranteed?
-~~- GUI / Design, administration and monitoring~~
+- ~~GUI / Design, administration and monitoring~~
 
 Also:
 
@@ -62,8 +62,9 @@ Also:
 Misc:
 
 [ ] Workflow/usage. Should it be a library or have a GUI (web based or native?)
-    - The framework should include a set of basic components
-    - It should be easy to add new components
+
+- The framework should include a set of basic components
+- It should be easy to add new components
 
 [ ] Distribution: should it be possible to scale a simulation to run on different threads/processes/nodes?
 
