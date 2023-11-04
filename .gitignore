@@ -2,6 +2,7 @@ TODO.md
 queueing_theory.md
 *.log
 *.png
+!assets/*
 *.csv
 stats.txt
 
