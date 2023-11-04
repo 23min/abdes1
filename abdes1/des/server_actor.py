@@ -8,7 +8,7 @@ A server actor is an actor that behaves like a service:
 - it performs the task
 - it indicates to the queue that it is ready to work on the next task
 
-In an m/m/1 queueing system, there is only one server.
+In an M/M/1 queueing system, there is only one server.
 """
 import random
 from typing import TypedDict

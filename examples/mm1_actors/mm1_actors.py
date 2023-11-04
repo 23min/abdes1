@@ -1,7 +1,7 @@
 """
 mm1-actors.py
 
-Implementation of an m/m/1 queueing system with actors
+Implementation of an M/M/1 queueing system with actors
 
 1. Read the confuguration from a file
 

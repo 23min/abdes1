@@ -32,7 +32,7 @@ This is a cornerstone example in the world of simulation, often referred to as t
 We will strive for repeatable results that match those from mm1.py.
 There `random.seed(333)` is used and there is a `next_exponential` function that provides the next random number.
 
-In the first iteration, we can try to follow the simplistic m/m/1 model from mm1.py.
+In the first iteration, we can try to follow the simplistic M/M/1 model from mm1.py.
 
 At this time it is unknown whether the actor system, in it's current primitive state, has enough functionality,. We will discover (and fix that) along the way.
 

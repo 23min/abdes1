@@ -11,14 +11,15 @@ This is my first serious attempt to work with the Python ecosystem with modern P
 
 ## Goals
 
-1. Create a proof of concept for using an actor system for simulating a moderately complex system based on discrete events.
+1. Learn Python :)
+2. Create a proof of concept for using an actor system for simulating a moderately complex system based on discrete events (and perhaps other types of models)
 abdes1 is the first experiment to get a working actor model and to run a the most basic DES.
-2. Learn how a moderately complex system can be modeled specifically for an actor based DES. How can the system be expressed as an input to the simulation?
-3. Validate that an actor based DES provides correct results
+3. Learn how a moderately complex system can be modeled specifically for an actor based DES. How can the system be expressed as an input to the simulation?
+4. Validate that an actor based DES provides correct results
 
 ## Non Goals
 
-Feature parity with any other tool out there.
+Feature parity with any other simulation framework or actor system out there.
 
 ## Principles and Method
 
@@ -39,7 +40,7 @@ Investigate whether everything can/should be an actor. The advantage if the cons
 
 With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here Erlang can be of inspiration. 
 
-[ ] Implement what is needed in a DES & try to run a minimal simulation (M/M/1 Single Server queueing system)
+[x] Implement what is needed in a DES & try to run a minimal simulation (M/M/1 Single Server queueing system)
 
 - Event calendar / Fuuture Event List / Loop
 - State management / Ability to interrogate state / logging 
@@ -52,15 +53,19 @@ With asyncio.gather, if one of the actors crashes, it cannot be restarted. Here 
 - Metrics / Statistical accumulators / Logging and monitoring
 - Termination conditions and implementation
 - Random number genertion / how is randomness achieved or determinism guaranteed?
-- GUI / Design, administration and monitoring
+~~- GUI / Design, administration and monitoring~~
 
 Also:
 
-- Factor out all DES/simulation related code from the actor system package. The actor system should be usable as a generic actor system. Take inspiration from Ptolemy II [^1]
+[x] Factor out all DES/simulation related code from the actor system package. The actor system should be usable as a generic actor system. Take inspiration from Ptolemy II [^1]
 
-[ ] Misc
-- Workflow/usage. Should it be a library or have a GUI (web based or native?)
-- Distribution: should it be possible to scale a simulation to run on different threads/processes/nodes?
+Misc:
+
+[ ] Workflow/usage. Should it be a library or have a GUI (web based or native?)
+    - The framework should include a set of basic components
+    - It should be easy to add new components
+
+[ ] Distribution: should it be possible to scale a simulation to run on different threads/processes/nodes?
 
 
 ## Q&A
@@ -77,7 +82,7 @@ In addition, I wish to fully understand and control the simulation environment a
 
 ## 2023-10-29
 
-abdes1 can now run a single server queue simulation (m/m/1) and get exactly the same results as loop based  reference implementation (see commit `50f1438fb52d5581541e399387998a931baa0fdf`)
+abdes1 can now run a single server queue simulation (M/M/1) and get exactly the same results as loop based  reference implementation (see commit `50f1438fb52d5581541e399387998a931baa0fdf`)
 
 The reference implementation is a standalone module: `examples/mm1/mm1.py`.
 The abdes1 implementation is defined in `examples/mm1_actors/mm1_actors.py`.
@@ -87,9 +92,9 @@ Abdes1 uses two random number generators, one for calculating arrival times, and
 
 The reference implementation initially only used one random number generator. This was modified so the reference implementation now also uses two random number generators.
 
-Output from m/m/1 reference implementation:
+Output from M/M/1 reference implementation:
 
-![Output from m/m/1 reference implementation](assets/queue_depth_mm1.png)
+![Output from M/M/1 reference implementation](assets/queue_depth_mm1.png)
 
 Output from abdes1 implementation:
 
@@ -131,7 +136,7 @@ Actors perform computations and generate and consume data, but they do so accord
 
 In the current implementation of abdes1, a generic `Actor` is subclassed into a `Generator` for arrivals, a `Queue` for the queue with customers and a `Server` for the single server. A separate `Event Loop` schedules and handles future events one at a time. Furthermore, Python's `asyncio` has a separate event loop and in order to have asynchronicity and determinism at the same time, extra measures are taken both by the actors as well as the actor system's Event Loop. The responsibility for scheduling and processing events is spread out and kind of "forced" on the actor system. 
 
-Simulation control (time management, scheduling) is in the Event Loop. Although the actors are running concurrently, really only one message is "in flight" at the same time. This is kind of a requirement in such a tiny Discrete Event system like a m/m/1 simulation. 
+Simulation control (time management, scheduling) is in the Event Loop. Although the actors are running concurrently, really only one message is "in flight" at the same time. This is kind of a requirement in such a tiny Discrete Event system like a M/M/1 simulation. 
 In fact, in the `DE_actor` that derives from `Actor` a message that arrives in a mailbox is processed immediately. I.e. the actor will immediately process upon a receive, even though the message goes through the mailbox. This gives "Fire" semantics where a message is processed synchronously/blocking from the point of view of the message sender (the Event Loop)
 So there is currently hardly any benefit in having concurrency. But in a larger system, there will be!
 
@@ -180,7 +185,7 @@ async def main():
 
 A registry is necessary in a distributed actor system. For now we can get by without. Or perhaps just keep it as is...
 
-### Simulation
+#### Simulation
 
 **Discrete Event Simulation**:
 
@@ -209,7 +214,20 @@ A time-triggered simulation is a type of simulation where events are scheduled t
     Depending on the time of day (morning rush hour in a hotel, lunch time, etc) certain rules may be more effective. 
     Most likely, customers' waiting time is what is optimized in an elevator system. Multiple customers can be served simultaneously, i.e. are processed in "batches". An elevator may be out of service. Etc.
 
-### Postpone
+**Note**: 
+
+To verify correctness it is necessary to also create reference implementations of any simulations that are implemented in abdes1. 
+
+#### Testing
+
+Before refactoring and implementing the Model of Computation concept and other things mentioned in the plan, it's probably a good idea to design some tests while the system appears to be working correctly.
+
+- Where necessary, add verification at the function level.
+- The individual components of the system work together correctly
+- The system should continue to produce the desired behavior and output.
+
+
+#### Postpone
 
 Initially I wanted to include some kind of visual interface for controlling and monitoring a simulation but I think it's more important to focus on the core architeture of the framework and validate it before proceeding with a GUI.
 

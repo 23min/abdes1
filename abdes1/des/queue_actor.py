@@ -10,8 +10,8 @@ A queue actor is an actor that behaves like a queue:
 
 This queue contains entities that arrive and wait to be served by a server.
 
-Typically, a FIFO queue is used in an m/m/1 queueing system.
-In an m/m/1 queueing system, there is only one server.
+Typically, a FIFO queue is used in an M/M/1 queueing system.
+In an M/M/1 queueing system, there is only one server.
 The id of this server is passed to the queue actor during initialization.
 """
 from asyncio import Queue
@@ -29,7 +29,7 @@ from abdes1.actors import Message
 from abdes1.des import DE_Actor
 
 
-# Having fun with queue types. For now we only use FIFO in m/m/1
+# Having fun with queue types. For now we only use FIFO in M/M/1
 class QueueType(Enum):
     FIFO = "FIFO"
     LIFO = "LIFO"
